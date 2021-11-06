@@ -6,52 +6,37 @@
 #include <string>
 #include <stdlib.h>
 #include <vector>
-#include "Input_Class.h"
 #include "Main.h"
 #include "Global.h"
-//#include "Trajectory.h"
-#include "Statistics.h"
 #include "Logger.h"
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include "Statistics.h"
+#include "Input_Class.h"
+
 using namespace std;
 
-int main(int argc, char *argv[])
+int main()
 {
   time_t tbeg, tend;
   time(&tbeg);
-  
+
   int i_Debug_Loc = 1;
   std :: string Debug = "[Main] : ";
-  std :: string Inp_fname = "./Input_files/Files.inp";
+  std :: string Inp_fname = "./Input_files/Stat_Input.inp";
 
   Input_Class* Input = new Input_Class;
   if(i_Debug_Loc) Write(Debug, "Calling ReadInput() ");
   Input->Read_Input(Inp_fname);
   if(i_Debug_Loc) Write(Debug, "Done Reading Inputs");
 
-  if(i_Debug_Loc) Write(Debug, "Number of procs = ",Input->NProcs);
-
+  if(i_Debug_Loc) Write(Debug, "Initializing Statistics class");
+  Statistics* Stat = new Statistics;
+  Stat->Initialize_Statistics(Input);
   
-
-  #pragma omp parallel
-  {
-    #pragma omp for
-    for (int iP=1; iP<=Input->NProcs; iP++)
-      {
-	Statistics* Stat = new Statistics;
-	//sleep(1);
-	Stat->Initialize_Statistics(iP, Input);
-	Stat->Process_Trajs(iP, Input, 1);
-	delete Stat;
-    }
-  }
-
-  // Combining the output files
-  Combine_Output(Input);
-
+  Stat->Process_Statistics(Input);
+  
   time(&tend);
   int tot_time = difftime(tend,tbeg);
   int hours    = tot_time/3600;

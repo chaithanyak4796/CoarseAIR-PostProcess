@@ -1,13 +1,13 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # Main Dir
-/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_2000_2000_0_0/
+/media/chaithanya/Chaithanya_New/QCT_Output/testing/CoarseAIR/Temp_1000K/T_1000_1000_0_0/
 
 # Bins_Dir
 Bins_10_0/
 
 # Number of Procs
-32
+36
 
 # Number of atoms
 3

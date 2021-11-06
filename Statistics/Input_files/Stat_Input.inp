@@ -1,0 +1,49 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#Source_Directory
+/media/chaithanya/Chaithanya_New/QCT_Output/testing/CoarseAIR/Temp_8000K/
+
+#Temperature [K]
+8000.0
+
+#omega (min and max)
+-5.0
+5.0
+
+#Case No. (suffix) Beg,End
+0
+0
+
+# How to treat f(omega)? 0: f(omega) = 1; f(omega) -> Poisson Distribution but Tau_coll = 1
+1
+
+# Number of Procs
+32
+
+# Number of atoms
+3
+
+# Atoms Names
+O
+O
+O
+
+# Levels_fname
+levels_O2.inp
+
+# LJ Params: eps (K) and sigma (Angs)
+113.2
+3.43
+
+# Resolve Pathways? 0: No; 1: Yes
+0
+
+#Number of pathways
+4
+
+# Pathway names
+Lindemann_Traj
+Chaperon_Traj
+No_Recomb_Traj
+Direct_Traj
+

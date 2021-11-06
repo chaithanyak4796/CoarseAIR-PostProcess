@@ -178,6 +178,11 @@ void Statistics :: Read_Traj(const std :: string fname)
 /**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
 void Statistics :: Read_PaQSol(const std :: string fname)
 {
+  int len = Find_length(fname,1);
+  if(len != NTraj)
+    {
+      Write(" WARNING :  The number of trajectories in PaQSol and trajectories.out do not match !!!!!!!");
+    }
   PaQSol = new double* [NTraj];
   int n_cols = 28;
   for (int i=0; i<NTraj; i++)
@@ -202,11 +207,17 @@ void Statistics :: Read_PaQSol(const std :: string fname)
   for (int i=0; i<r_skip; i++)
     std :: getline(f_sol,line);
 
-  for (int i=0; i<NTraj; i++)
+  int iT = -1;
+  for (int i=0; i<len; i++)
     {
+      iT++;
       for (int j=0; j<n_cols; j++)
 	{
-	  f_sol>>PaQSol[i][j];
+	  f_sol>>PaQSol[iT][j];
+	}
+      if( PaQSol[iT][0] != Traj_tot[iT][0] )
+	{
+	  iT--;
 	}
     }
   
@@ -259,7 +270,7 @@ void Statistics :: InitializeOutput_files(Input_Class* Input, int iP)
     }
 
    ftraj_header = " iPES iProc  iTraj  E1[eV]    E2[eV]  b1_max[Bo]  b1[Bo]   b2_max[Bo] b2[Bo]    d1[Bo]    d2[Bo]       v         j         arr        omega   Path_idx E_int[eV]     tau_OP[s]\n";
-   ftraj_format = "%4d  %4d  %5d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E\n";
+   ftraj_format = "%4d  %4d  %6d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E\n";
 
   fprintf(ftraj,ftraj_header);
 }

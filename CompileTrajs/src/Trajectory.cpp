@@ -80,7 +80,7 @@ Trajectory :: ~Trajectory() // Destructor
 
 void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Traj_tot, double** PaQSol, double** arr_matrix)
 {
-  int i_Debug_Loc = 1;
+  int i_Debug_Loc = 0;
   std :: string Debug = "   [Initialize_Trajectory] :";
   if(i_Debug_Loc) Write(Debug, "Entering");
 
@@ -264,7 +264,14 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
   // Evaluating Bunker's lifetime and omega
   Eval_tau(Input->eps_LJ, Input->sig_LJ);
   Calc_Traj_Params();
-  if(i_Debug_Loc) Write(Debug, "omega = ",omega);  
+  if(i_Debug_Loc) Write(Debug, "omega = ",omega);
+
+  if(recomb_check == 0)
+    {
+      v = -1;
+      j = -1;
+    }
+  
   if(i_Debug_Loc) Write(Debug, "Exiting");
 }
 
