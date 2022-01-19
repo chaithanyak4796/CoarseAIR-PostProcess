@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.11)
 project (CompileTrajs)
 
 # Do you want to compile with OpenMP support? (YES/NO) : OpenMP jumbles the log file.
-set (Include_OpenMP YES)
+set (Include_OpenMP NO)
 
 set(EXECUTABLE_OUTPUT_PATH ../)
 set(CMAKE_SOURCE_DIR ./src/)

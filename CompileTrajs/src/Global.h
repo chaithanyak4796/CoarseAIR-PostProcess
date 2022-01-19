@@ -8,6 +8,7 @@
 #define Hartree_eV 27.2114   
 #define eV_J    1.602176565E-19
 #define au_s    2.4188843265E-17
+#define au_ps   au_s*1E12
 #define t_14    413.413734     // 1E-14 seconds in atomic units (to prevent machine precision level error)
 
 #define mass_O 29148.94559   // mass of O atom in atomic units

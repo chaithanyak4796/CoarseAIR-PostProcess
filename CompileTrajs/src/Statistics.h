@@ -21,6 +21,8 @@ class Statistics
  	vector<vector<vector<double> >> Path_Traj ;
 	vector<vector<double> > Traj_En;
 
+	std :: string Proc_Dir;
+
 	FILE * ftraj;
 	std :: string fname_traj;
 	const char* ftraj_header;

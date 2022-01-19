@@ -46,7 +46,7 @@ Trajectory:: Trajectory()  // Constructor
 
   tau = 0;
 
-  n_t = 0;
+  nsteps = 0;
 
   v_ini = 0;
   j_ini = 0;
@@ -67,12 +67,27 @@ Trajectory:: Trajectory()  // Constructor
 
   cmplx_id = -1;
 
-
+  path_idx = 0;
 
 }
 
 Trajectory :: ~Trajectory() // Destructor
 {
+  if(recomb_check)
+    {
+      for(int i=0; i<nsteps; i++)
+	{
+	  delete[] P[i];
+	  delete[] Q[i];
+	  delete[] R[i];
+	  delete[] Acc[i];
+	}
+      delete[] t;
+      delete[] P;
+      delete[] Q;
+      delete[] R;
+      delete[] Acc;
+    }
   
 }
 
@@ -80,7 +95,7 @@ Trajectory :: ~Trajectory() // Destructor
 
 void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Traj_tot, double** PaQSol, double** arr_matrix)
 {
-  int i_Debug_Loc = 0;
+  int i_Debug_Loc = 1;
   std :: string Debug = "   [Initialize_Trajectory] :";
   if(i_Debug_Loc) Write(Debug, "Entering");
 
@@ -99,7 +114,8 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
   iNode  = int(Traj_tot[i][12]);
   iProc  = int(Traj_tot[i][13]);
   NCoords= 3*Input->NAtoms;
-
+  NAtoms = Input->NAtoms;;
+  
   double m1 = Input->Atom_Masses[0];
   double m2 = Input->Atom_Masses[1];
   double m3 = Input->Atom_Masses[2];
@@ -413,3 +429,211 @@ void Trajectory :: Adjust_QN()
 	if(i_Debug_Loc) Write(Debug,"Exiting");
 }
 	
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+void Trajectory :: Determine_pathway(std :: string Proc_Dir, Input_Class* Input)
+{
+  int i_Debug_Loc = 1;
+  std :: string Debug = " [Determine pathway] :";
+  if(i_Debug_Loc) Write(Debug,"Entering");
+
+  // First read the PaQEvo file
+  std :: string fname = Proc_Dir + "PaQEvo-" + to_string(iTraj) + ".out";
+  if(i_Debug_Loc) Write(Debug, "PaQEvo file name = ",fname);
+
+  ifstream fcheck;
+  fcheck.open(fname.c_str());
+  if(!fcheck)
+    {
+      Write(Debug,"Error opening file :",fname);
+      exit(0);
+    }
+  fcheck.close();
+
+  nsteps = Find_length(fname,1);
+  if(i_Debug_Loc) Write(Debug,"Number of timesteps in this trajectory =",nsteps);
+
+  t = new double  [nsteps];
+  P = new double* [nsteps];
+  Q = new double* [nsteps];
+  R = new double* [nsteps];
+  Acc = new double* [nsteps];
+
+  for (int i=0; i<nsteps; i++)
+    {
+      P[i]   = new double [NCoords];
+      Q[i]   = new double [NCoords];
+      R[i]   = new double [3];   // Has to be adjusted for NAtoms>3
+      Acc[i] = new double [3];
+    }
+
+  if(i_Debug_Loc) Write(Debug,"Reading the PaQ Evo file and calculating the PaQ for the 3rd atom");
+  Read_PaQEvo(fname, Input);
+  //if(i_Debug_Loc) Write(Debug,"P[17][2] = ",P[17][2]);
+
+  if(i_Debug_Loc) Write(Debug,"Calculating the inter atomic distances.");
+  Calc_inter_distance();
+
+  if(i_Debug_Loc) Write(Debug, "Calculating the acclerations");
+  Calc_acceleration(0);
+
+  if(i_Debug_Loc) Write(Debug, "Checking if the pathway is Direct");
+  int direct_check = Check_Direct();
+  
+  if(i_Debug_Loc) Write(Debug,"Exiting");
+}
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+int Trajectory :: Check_Direct()
+{
+  int i_Debug_Loc = 1;
+  int direct_check = 0 ;
+
+  std :: string Debug = "  [Check_Direct_New]  :";
+  if(i_Debug_Loc) Write(Debug,"Entering");
+
+  // Getting t_2B and t_3B
+  double t_first [3];   // Array containing the first timestamps when the atoms feel a force
+  double t_first_idx [3];   // Array containing the first timestamps (index) when the atoms feel a force
+  for (int k=0; k<3; k++)
+    {
+      t_first[k] = -1;
+      for(int i = 1; i<nsteps-1; i++)
+	{
+	  //if(i_Debug_Loc) Write(Debug,t[i]*au_ps,Acc[i][j]);
+	  if(Acc[i][k] > 1.0E-4 )  // threshold of acceleration [Bo/ps^2]
+	    {
+	      if(i_Debug_Loc) Write(Debug,"Acc[i][k] = ", Acc[i][k]);  // There is some error here. Start from here.
+	      t_first[k] = t[k]*au_ps;
+	      t_first_idx[k] = i;
+	      break;
+	    }
+	}
+    }
+
+  if(i_Debug_Loc) Write(Debug,"The time-stamps (in ps) of first interactions are ",t_first[0],t_first[1],t_first[2]);
+
+  return direct_check;
+  if(i_Debug_Loc) Write(Debug,"Exiting");
+}
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+void Trajectory :: Calc_inter_distance()
+{
+  for(int i=0; i<nsteps; i++)
+    {
+      R[i][0] = pow((Q[i][0] - Q[i][3]),2) + pow((Q[i][1] - Q[i][4]),2) + pow((Q[i][2] - Q[i][5]),2);   // R12
+      R[i][1] = pow((Q[i][0] - Q[i][6]),2) + pow((Q[i][1] - Q[i][7]),2) + pow((Q[i][2] - Q[i][8]),2);   // R13
+      R[i][2] = pow((Q[i][3] - Q[i][6]),2) + pow((Q[i][4] - Q[i][7]),2) + pow((Q[i][5] - Q[i][8]),2);   // R23
+
+      R[i][0] = sqrt(R[i][0]);
+      R[i][1] = sqrt(R[i][1]);
+      R[i][2] = sqrt(R[i][2]);
+    }
+}
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+void Trajectory :: Calc_acceleration(int method)
+{
+  // This function calculates the acceleration of all 3 particles from velocities
+  // method = 0 : Central Differencing
+  // method = 1 : Backward Differencing
+
+  // Initialize the array (Move this to Initialize() later if required)
+  double temp[9], arr[3];
+
+  for (int i = 1; i< nsteps-1; i++)
+    {
+      for (int k=0; k<9; k++)
+	{
+	  if(method == 0)
+	    {
+	      temp[k] = (P[i+1][k] - P[i-1][k])/(t[i+1] - t[i-1]);
+	    }
+	  else if(method == 1)
+	    {
+	      temp[k] = (P[i][k] - P[i-1][k])/(t[i] - t[i-1]);
+	    }
+
+	  temp[k] = temp[k]/pow((au_ps),2);  // Converting to Bo/ps^2
+	}
+
+      for(int k=0; k<3; k++)
+	{
+	  arr[0] = temp[3*k];
+	  arr[1] = temp[3*k+1];
+	  arr[2] = temp[3*k+2];
+
+	  Acc[i][k] = sqrt(dot(arr,arr));
+	}
+
+    }
+}
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
+{
+  int i_Debug_Loc = 0;
+  std :: string Debug = " [Read_PaQEvo] :";
+  if(i_Debug_Loc) Write(Debug,"Entering");
+  
+  double m1 = Input->Atom_Masses[0];
+  double m2 = Input->Atom_Masses[1];
+  double m3 = Input->Atom_Masses[2];
+  
+  ifstream fr;
+  fr.open(fname.c_str());
+  if(!fr)
+    {
+      Write(" Error opening file : ",fname);
+      exit(0);
+    }
+    
+  int r_skip = 1;
+  std :: string line;
+  for (int i=0; i<r_skip; i++)
+    std :: getline(fr,line);
+
+  double** arr;
+  arr = new double* [nsteps];
+  for (int i=0; i<nsteps; i++)
+    {
+      arr[i] = new double[15];
+      for(int k=0; k<15; k++)
+	{
+	  fr >> arr[i][k];
+	}
+
+      
+      // Copy the data into appropriate arrays
+      t[i]    = arr[i][0];
+      P[i][0] = arr[i][2];
+      P[i][1] = arr[i][3];
+      P[i][2] = arr[i][4];
+      P[i][3] = arr[i][5];
+      P[i][4] = arr[i][6];
+      P[i][5] = arr[i][7];
+      Q[i][0] = arr[i][8];
+      Q[i][1] = arr[i][9];
+      Q[i][2] = arr[i][10];
+      Q[i][3] = arr[i][11];
+      Q[i][4] = arr[i][12];
+      Q[i][5] = arr[i][13];
+
+      // Calculate the P and Q for the third atom.
+
+      P[i][6] = -(m1/m3) * P[i][0] - (m2/m3) * P[i][3];
+      P[i][7] = -(m1/m3) * P[i][1] - (m2/m3) * P[i][4];
+      P[i][8] = -(m1/m3) * P[i][2] - (m2/m3) * P[i][5];
+
+      Q[i][6] = -(m1/m3) * Q[i][0] - (m2/m3) * Q[i][3];
+      Q[i][7] = -(m1/m3) * Q[i][1] - (m2/m3) * Q[i][4];
+      Q[i][8] = -(m1/m3) * Q[i][2] - (m2/m3) * Q[i][5];
+    }
+
+  fr.close();
+
+  for(int i=0; i<nsteps; i++)
+    delete[] arr[i];
+  delete[] arr;
+  
+}
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/

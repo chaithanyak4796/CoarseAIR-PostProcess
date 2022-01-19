@@ -9,7 +9,6 @@
 #include "Input_Class.h"
 #include "Main.h"
 #include "Global.h"
-//#include "Trajectory.h"
 #include "Statistics.h"
 #include "Logger.h"
 #include <time.h>

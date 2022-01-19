@@ -5,3 +5,9 @@ CompileTrajs:
 
 Statistics:
 	* Combines the compiled traj files from different cases and computes the recombination statistics.
+
+Scripts:
+	* Contains python scripts for further specific post-processing.
+
+Dissociation:
+	* Python scripts for dissociation post-processing.

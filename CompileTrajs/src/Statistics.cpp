@@ -100,15 +100,16 @@ void Statistics :: Initialize_Statistics(int iP, Input_Class* Input)
 	if(i_Debug_Loc) Write(Debug,"Initialized the arr_matrix with appropriate values");
 
 	std :: string Traj_fname, PaQSol_fname;
-	
-	Traj_fname = Input->Main_Dir + Input->Bins_Dir + "Node_1/Proc_" + to_string(iP) + "/trajectories.out";
+	Proc_Dir = Input->Main_Dir + Input->Bins_Dir + "Node_1/Proc_" + to_string(iP) + "/";
+
+	Traj_fname = Proc_Dir + "trajectories.out";
 	if(i_Debug_Loc) Write(Debug, "Reading trajectories file : ", Traj_fname);
 	Read_Traj(Traj_fname);
 	if(i_Debug_Loc) Write(Debug, "Done reading trajectories file");
 	if(i_Debug_Loc) Write(Debug, "Number of trajs in file = ", NTraj);
 	if(i_Debug_Loc) Write(Debug, "Traj_tot[10][3] = ",Traj_tot[10][3]);
 
-	PaQSol_fname = Input->Main_Dir + Input->Bins_Dir + "Node_1/Proc_" + to_string(iP) + "/PaQSol.out";
+	PaQSol_fname = Proc_Dir + "PaQSol.out";
 	if(i_Debug_Loc) Write(Debug, "Reading PaQSol file : ", PaQSol_fname);
 	Read_PaQSol(PaQSol_fname);
 	if(i_Debug_Loc) Write(Debug, "Done reading PaQSol file");
@@ -238,9 +239,14 @@ void Statistics :: Process_Trajs(int iP, Input_Class* Input, int i_Debug_Loc)
   int iT;
   for (int i=0; i<NTraj; i++)
     {
+      if(i_Debug_Loc) Write("");
       iT = int(Traj_tot[i][0]);
       Trajectory* Traj = new Trajectory;
       Traj->Initialize_Trajectory(i, Input, Traj_tot, PaQSol, arr_matrix);
+      /*if(Input->determine_pathway == 1 and Traj->recomb_check == 1)
+	{
+	  Traj->Determine_pathway(Proc_Dir, Input);
+	}*/
       WriteOutput(Traj);
       delete Traj;
     }

@@ -20,6 +20,7 @@ class Trajectory
 	std :: string PaQ_fname;  // File name of the PaQEvo file
 
 	int NCoords;     // Number of coordinates of P/Q
+	int NAtoms;
 	
 	double b1;           // Impact Parameter of A-B
 	double b2;        // Impact Parameter of AB-C
@@ -43,7 +44,7 @@ class Trajectory
 	
 	double tau;       // Bunker's Lifetime
 	
-	int n_t;           // Number of timesteps in the trajectory    
+	int nsteps;           // Number of timesteps in the trajectory    
 	
 	double v_ini;      // Initial Vibrational q.n
 	double j_ini;      // Initial Rotational q.n
@@ -56,9 +57,8 @@ class Trajectory
 	double*  t;        // Time
 	double** P;        // Velocities
 	double** Q;        // Positions
-	double*  V;        // Potential
 	double** R;        // Internuclear distances
-	double** R_J;      // Internuclear distances in the Jacobi Coordinate system
+	double** Acc;      // Accelerations
 	
 	double* Pini;      // Initial Velocities
 	double* Qini;      // Initial Positions
@@ -81,7 +81,7 @@ class Trajectory
 	int cmplx_id;      // Index of pair that forms a ""complex""
 	
 	bool assigned;     // A flag to keep track of wheter the pathway has already been assigned
-	
+	int path_idx;      // Index of recombination pathway; 0 : No recombination; 1: Lindemann; 2: Chaperon; 3: Direct
 	
 	//public:
 	
@@ -92,7 +92,12 @@ class Trajectory
     
     //void Initialize_Trajectory(int iN, int iP, int iT, const std::string& Traj_dir, int NTraj_Global, double** Traj_tot, Statistics* Stat, vector<vector<double>> PaQSol);
    
-    //void Determine_mechanism(Statistics* Stat);
+	void Determine_pathway(std :: string Proc_Dir, Input_Class* Input);
+	void Read_PaQEvo(std :: string fname, Input_Class* Input);
+	void Calc_inter_distance();
+	void Calc_acceleration(int method);
+	int  Check_Direct();
+	
     void Find_minima(int num, double t_beg);
     //int Check_Direct(Statistics* Stat);
     void Determine_cmplx();

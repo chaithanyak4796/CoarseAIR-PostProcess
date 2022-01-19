@@ -59,7 +59,13 @@ void Input_Class :: Read_Input(const std::string& Inp_fname)
 
   std :: getline(finp,line);     // Blank line
   std :: getline(finp,line);     // Comment
-  std :: getline(finp,line);     // NProcs
+  std :: getline(finp,line);     // determine_pathway
+  determine_pathway = stoi(line);
+  if(i_Debug_Loc) Write(Debug,"Determine Pathway? = ",determine_pathway);
+
+  std :: getline(finp,line);     // Blank line
+  std :: getline(finp,line);     // Comment
+  std :: getline(finp,line);     // NAtoms
   NAtoms = stoi(line);
   if(i_Debug_Loc) Write(Debug,"Number of atoms = ",NAtoms);
 

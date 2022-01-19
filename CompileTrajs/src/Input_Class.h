@@ -11,6 +11,8 @@ class Input_Class
   int NProcs;   // Number of processors
   int NAtoms;  // Number of atoms
 
+  int determine_pathway;  // Flag to determine pathways?
+
   char* Atom_Names;     // Name of atoms
   double* Atom_Masses;  // Mass of the atoms
 
