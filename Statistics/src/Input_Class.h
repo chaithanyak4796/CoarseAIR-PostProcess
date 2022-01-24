@@ -28,8 +28,6 @@ class Input_Class
   double sig_LJ;
 
   int resolve_path;           // Resolve recombination pathways?
-  int n_path;                 // Number of pathways
-  vector<string> Path_name;   // Vector of pathway names
 
   int Poisson_treat;    // How to treat the Poisson distribution?
 

@@ -49,7 +49,7 @@ void Statistics :: Initialize_Statistics (Input_Class* Input)
   omega_max = Input->omega_max;
 
   resolve_path = Input->resolve_path;
-  n_paths      = Input->n_path;
+  n_paths      = 3;
   if(resolve_path == 0)
     n_paths = 1;
   Poisson_treat = Input->Poisson_treat;
@@ -392,7 +392,7 @@ void Statistics :: Compute_RateConstant(Input_Class* Input)
   if(i_Debug_Loc) Write(Debug,"Entering");
 
   if(i_Debug_Loc) Write(Debug,"Initializing the k_state and k_state_var arrays");
-  k_state     = new double* [n_paths+1];
+  k_state     = new double* [n_paths+1];    // n_paths+1 because the last index is used to store the overall rates
   k_state_var = new double* [n_paths+1];
   krec        = new double  [n_paths+1];
   krec_var    = new double  [n_paths+1];
@@ -628,7 +628,7 @@ void Statistics :: WriteOutput(Input_Class* Input)
     }
 
   fprintf(fks,"   Temp       path_idx   k_rec[m^6/s]   k_rec_std[m^6/s]\n");
-  for (int p=0; p<n_paths; p++)
+  for (int p=0; p<n_paths+1; p++)
     {
       fprintf(fks,"%.6f      %2d       %10.6E    %10.6E\n", Temp, p, krec[p]*k_conv_fac, krec_var[p]*k_conv_fac);
     }
@@ -649,7 +649,7 @@ void Statistics :: Merge_Traj_files(Input_Class* Input)
   std :: string Debug = " [Merge_Traj_files] :";
   if(i_Debug_Loc) Write(Debug,"Entering");
 
-  Stat_Dir = Input->Source_Dir + "Statistics/";
+  Stat_Dir = Input->Source_Dir + "Statistics-new/";
   if(i_Debug_Loc) Write (Debug, "Stat_Dir = ", Stat_Dir);
 
   std :: string command;
@@ -694,7 +694,7 @@ void Statistics :: Merge_Traj_files(Input_Class* Input)
 void Statistics :: Read_Traj_tot()
 {
   Traj = new double* [NTraj];
-  int ncols = 18;
+  int ncols = 19;
   for (int i=0; i<NTraj; i++)
     {
       Traj[i] = new double [ncols];

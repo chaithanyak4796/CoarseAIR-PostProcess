@@ -5,7 +5,6 @@
 #include<sstream>
 #include <stdlib.h>
 #include <vector>
-//#include "Main.h"
 #include "Global.h"
 #include "Logger.h"
 #include "Input_Class.h"
@@ -138,23 +137,6 @@ void Input_Class :: Read_Input(const std::string& Inp_fname)
   std :: getline(finp,line);    // resolve_path
   resolve_path = stoi(line);
   if(i_Debug_Loc) Write(Debug, "resolve_path =", resolve_path);
-
-  std :: getline(finp,line);    // Blank line
-  std :: getline(finp,line);    // Comment
-  std :: getline(finp,line);    // n_path
-  n_path = stoi(line);
-  if(i_Debug_Loc) Write(Debug, "n_path = ", n_path);
-
-  std :: getline(finp,line);   //Blank Line
-  std :: getline(finp,line);   //Comment
-  for(int i=0; i<n_path; i++)
-    {
-      std :: getline(finp,line);
-      Path_name.push_back(line);
-
-      if(i_Debug_Loc) Write(Debug,"Path_name",i,"=",Path_name[i]);
-    }
-
   
   if(i_Debug_Loc) Write(Debug,"Exiting");
 }

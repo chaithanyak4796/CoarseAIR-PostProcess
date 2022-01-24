@@ -63,7 +63,8 @@ void Combine_Output(Input_Class* Input)
     }
   if(i_Debug_Loc) Write(Debug, "Done combining path-specific trajectory files");
 
-  Merge_Count_files(Proc_pref, Input->NProcs, Output_Dir, del_Proc_files);
+  if (Input->determine_pathway)
+    Merge_Count_files(Proc_pref, Input->NProcs, Output_Dir, del_Proc_files);
   
   if(i_Debug_Loc) Write(Debug,"Exiting");
 }
@@ -133,6 +134,7 @@ void Merge_Count_files(const std :: string& Proc_pref, int NProcs, const std :: 
 	      }
 	  }
 	fread.close();
+	Delete_Proc_files(Proc_file, del_Proc_files);
     }
 
   // Write the overall Count info

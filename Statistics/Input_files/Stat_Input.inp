@@ -1,10 +1,10 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #Source_Directory
-/media/chaithanya/Chaithanya_New/QCT_Output/Results/N3/Recombination/Rates/Temp_18000K/
+/media/chaithanya/Chaithanya_New/QCT_Output/Results/N3/Recombination/Rates/Pathway/Temp_12000K/
 
 #Temperature [K]
-18000.0
+12000.0
 
 #omega (min and max)
 -5.0
@@ -12,13 +12,13 @@
 
 #Case No. (suffix) Beg,End
 1
-4
+10
 
 # How to treat f(omega)? 0: f(omega) = 1; f(omega) -> Poisson Distribution but Tau_coll = 1
 1
 
 # Number of Procs
-36
+20
 
 # Number of atoms
 3
@@ -36,14 +36,4 @@ levels_N2.inp
 2.94
 
 # Resolve Pathways? 0: No; 1: Yes
-0
-
-#Number of pathways
-4
-
-# Pathway names
-Lindemann_Traj
-Chaperon_Traj
-No_Recomb_Traj
-Direct_Traj
-
+1
