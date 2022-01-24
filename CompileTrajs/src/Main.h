@@ -22,7 +22,10 @@ using namespace std;
 
 int Find_length(const std :: string& file_name, int rskip);
 void Combine_Output(Input_Class* Input);
-  
+void Delete_Proc_files(const std :: string& file_name, int del);
+void Merge_files(const std :: string& Proc_pref, int NProcs, const std :: string& Output_Dir, const std :: string& file_name, int del_Proc_files);
+void Merge_Count_files(const std :: string& Proc_pref, int NProcs, const std :: string& Output_Dir, int del_Proc_files);
+
 //void Read_PaQEvo(const std :: string& file_name, int n_t, double* t, double** P, double ** Q, double *V);
 
 //void Calc_inter_dist(int n_t, double* t, double** Q, double** R);

@@ -79,7 +79,8 @@ class Trajectory
 	double t_skip;     // Time skip parameter for direct 3B collision
 	double t_del;
 	int cmplx_id;      // Index of pair that forms a ""complex""
-	
+	double ratio;      // Ratio of 2 body to three body interactions
+	 
 	bool assigned;     // A flag to keep track of wheter the pathway has already been assigned
 	int path_idx;      // Index of recombination pathway; 0 : No recombination; 1: Lindemann; 2: Chaperon; 3: Direct
 	
@@ -92,7 +93,7 @@ class Trajectory
     
     //void Initialize_Trajectory(int iN, int iP, int iT, const std::string& Traj_dir, int NTraj_Global, double** Traj_tot, Statistics* Stat, vector<vector<double>> PaQSol);
    
-	void Determine_pathway(std :: string Proc_Dir, Input_Class* Input);
+	int Determine_pathway(std :: string Proc_Dir, Input_Class* Input, double** arr_matrix);
 	void Read_PaQEvo(std :: string fname, Input_Class* Input);
 	void Calc_inter_distance();
 	void Calc_acceleration(int method);
@@ -100,7 +101,9 @@ class Trajectory
 	
     void Find_minima(int num, double t_beg);
     //int Check_Direct(Statistics* Stat);
-    void Determine_cmplx();
+    void Determine_complex(double t_first_idx[3]);
+    double Determine_t_min(int pair);
+    
     void Eval_tau(double e_LJ, double sigma_LJ);
     void Calc_Traj_Params();
     

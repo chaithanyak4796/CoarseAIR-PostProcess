@@ -59,21 +59,16 @@ Trajectory:: Trajectory()  // Constructor
   //mu12_3 = (m1+m2)*m3/(m1+m2+m3);
 
 
-  r_direct = 10;           // Currently using 8 bohrs. Update later
-  //t_cmplx  = 1E-13/au_s;  // Currently using this value (in a.u)
-  t_del   = 1.0*t_14;  // Currently using this value (in a.u)
-  // The above three values can be updated as per our wish. If I want to give different trehsholds for different energies,
-  // just initialize them in the Initialize_Trajectory function()
-
   cmplx_id = -1;
 
   path_idx = 0;
+  ratio    = 0.0;
 
 }
 
 Trajectory :: ~Trajectory() // Destructor
 {
-  if(recomb_check)
+  /*if(recomb_check)
     {
       for(int i=0; i<nsteps; i++)
 	{
@@ -87,7 +82,7 @@ Trajectory :: ~Trajectory() // Destructor
       delete[] Q;
       delete[] R;
       delete[] Acc;
-    }
+      }*/
   
 }
 
@@ -225,6 +220,8 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
   // Calculate the internal energy of the molecule
   if(recomb_check)
     {
+      path_idx = 1; // In case we check the recombination pathways, this will be updated again.
+      
       int mol1,mol2,mol3;
       mol1 = -1; mol2 = -1; mol3 = -1;
       if( arr == arr_matrix[0][0] || arr == arr_matrix[0][1] || arr == arr_matrix[0][2] )
@@ -430,7 +427,7 @@ void Trajectory :: Adjust_QN()
 }
 	
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
-void Trajectory :: Determine_pathway(std :: string Proc_Dir, Input_Class* Input)
+int Trajectory :: Determine_pathway(std :: string Proc_Dir, Input_Class* Input, double** arr_matrix)
 {
   int i_Debug_Loc = 1;
   std :: string Debug = " [Determine pathway] :";
@@ -472,13 +469,34 @@ void Trajectory :: Determine_pathway(std :: string Proc_Dir, Input_Class* Input)
 
   if(i_Debug_Loc) Write(Debug,"Calculating the inter atomic distances.");
   Calc_inter_distance();
+  if(i_Debug_Loc) Write(Debug, "Initial Distances = ", R[0][0], R[0][1], R[0][2]);
 
   if(i_Debug_Loc) Write(Debug, "Calculating the acclerations");
   Calc_acceleration(0);
 
   if(i_Debug_Loc) Write(Debug, "Checking if the pathway is Direct");
   int direct_check = Check_Direct();
-  
+
+  if(!direct_check)
+    {
+      if(i_Debug_Loc) Write(Debug,"The current trajectory corresponds to a Direct 3B recombination !!!!!!");
+      path_idx = 3;
+    }
+  else
+    {
+      if( arr == arr_matrix[cmplx_id][0] || arr == arr_matrix[cmplx_id][1] || arr == arr_matrix[cmplx_id][2] )
+	{
+	  if(i_Debug_Loc) Write(Debug,"This trajectory corresponds to a Lindemann Mechanism");
+	  path_idx = 1;
+	}
+      else
+	{
+	  if(i_Debug_Loc) Write(Debug,"This trajectory corresponds to a Chaperon Mechanism");
+	  path_idx = 2;
+	}
+    }
+
+  return path_idx;
   if(i_Debug_Loc) Write(Debug,"Exiting");
 }
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -502,7 +520,7 @@ int Trajectory :: Check_Direct()
 	  if(Acc[i][k] > 1.0E-4 )  // threshold of acceleration [Bo/ps^2]
 	    {
 	      if(i_Debug_Loc) Write(Debug,"Acc[i][k] = ", Acc[i][k]);  // There is some error here. Start from here.
-	      t_first[k] = t[k]*au_ps;
+	      t_first[k] = t[i]*au_ps;
 	      t_first_idx[k] = i;
 	      break;
 	    }
@@ -511,11 +529,94 @@ int Trajectory :: Check_Direct()
 
   if(i_Debug_Loc) Write(Debug,"The time-stamps (in ps) of first interactions are ",t_first[0],t_first[1],t_first[2]);
 
+  double t_2B, t_3B, t_OP;
+  t_2B = 0; t_3B = 0; t_OP = 0;
+
+  t_3B = t_first[get_max(t_first[0],t_first[1],t_first[2])];
+  t_2B = t_first[get_min(t_first,3)];
+
+  // Determine the pair that forms a "complex"
+  Determine_complex(t_first_idx);
+  if(i_Debug_Loc) Write(Debug,"The pair that forms a complex is iPair =",cmplx_id);
+  t_OP  = Determine_t_min(cmplx_id);
+  t_OP *= au_ps;
+  
+  if(i_Debug_Loc) Write(Debug,"t_2B = ",t_2B);
+  if(i_Debug_Loc) Write(Debug,"t_3B = ",t_3B);
+
+  if(i_Debug_Loc) Write(Debug,"t_OP = ",t_OP);
+
+  ratio = (t_OP - t_3B)/(t_OP - t_2B);
+
+  if(i_Debug_Loc) Write(Debug,"ratio = ",ratio);
+
+  if(ratio < 0.95) // Another treshold
+    {
+      direct_check++;   // direct_check == 0  ====> Direct recombination
+    }
+  
   return direct_check;
   if(i_Debug_Loc) Write(Debug,"Exiting");
 }
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+void Trajectory :: Determine_complex(double t_first_idx[3])
+{
+  // This function determines the id of the OP
+  // It looks for the first time stamp when each atoms face a force and identifies the pair that feels the same force at that time.
+
+  int i_Debug_Loc = 0;
+  std :: string Debug = "   [Determine_cmplx_new]  :";
+  if(i_Debug_Loc) Write(Debug,"Entering");
+
+  int t2B;
+  t2B = get_min(t_first_idx,3);
+  t2B = t_first_idx[t2B];
+  if(i_Debug_Loc) Write(Debug,"t_first_idx = ",t_first_idx[0],t_first_idx[1],t_first_idx[2]);
+  if(i_Debug_Loc) Write(Debug,"t2B = ",t2B);
+  if(i_Debug_Loc) Write(Debug,"Acc[t2B] = ",Acc[t2B][0],Acc[t2B][1],Acc[t2B][2]);
+
+  double eps = 1E-5;
+
+  double da12, da13, da23;
+
+  da12 = fabs(Acc[t2B][0]-Acc[t2B][1]);
+  da13 = fabs(Acc[t2B][0]-Acc[t2B][2]);
+  da23 = fabs(Acc[t2B][1]-Acc[t2B][2]);
+
+  double da[3] = {da12, da13, da23};
+
+  if(i_Debug_Loc)
+    {
+      Write(Debug,"da12 = ",da12);
+      Write(Debug,"da13 = ",da13);
+      Write(Debug,"da23 = ",da23);
+    }
+
+  cmplx_id = get_min(da,3);
+
+  if(i_Debug_Loc) Write(Debug,"cmplx_id = ",cmplx_id);
+  if(i_Debug_Loc) Write(Debug,"Exiting");
+}
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+double Trajectory :: Determine_t_min(int pair)
+{
+  // This function determines the first instance of local minima for a pair of atoms
+  // Currently, this is primarily used for determining the t_OP timestamp
+
+  double t_min = 0;
+  
+  for (int i=1; i<nsteps-1; i++)
+    {
+      if(R[i][pair] < R[i-1][pair] && R[i][pair] < R[i+1][pair])
+	{
+	  t_min = t[i];
+	  break;
+	}
+    }
+
+  return t_min;
+}
+ 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 void Trajectory :: Calc_inter_distance()
@@ -571,7 +672,7 @@ void Trajectory :: Calc_acceleration(int method)
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
 {
-  int i_Debug_Loc = 0;
+  int i_Debug_Loc = 1;
   std :: string Debug = " [Read_PaQEvo] :";
   if(i_Debug_Loc) Write(Debug,"Entering");
   
@@ -592,6 +693,9 @@ void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
   for (int i=0; i<r_skip; i++)
     std :: getline(fr,line);
 
+  int nsteps_ac = nsteps;
+  int idx = -1;
+  
   double** arr;
   arr = new double* [nsteps];
   for (int i=0; i<nsteps; i++)
@@ -602,31 +706,40 @@ void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
 	  fr >> arr[i][k];
 	}
 
+      if(idx >=0 && arr[i][0] == t[idx])
+	{
+	  // Time steps are repeated
+	  nsteps_ac--;
+	}
       
-      // Copy the data into appropriate arrays
-      t[i]    = arr[i][0];
-      P[i][0] = arr[i][2];
-      P[i][1] = arr[i][3];
-      P[i][2] = arr[i][4];
-      P[i][3] = arr[i][5];
-      P[i][4] = arr[i][6];
-      P[i][5] = arr[i][7];
-      Q[i][0] = arr[i][8];
-      Q[i][1] = arr[i][9];
-      Q[i][2] = arr[i][10];
-      Q[i][3] = arr[i][11];
-      Q[i][4] = arr[i][12];
-      Q[i][5] = arr[i][13];
+      else
+	{
+	  idx ++;
+	  // Copy the data into appropriate arrays
+	  t[idx]    = arr[i][0];
+	  P[idx][0] = arr[i][2];
+	  P[idx][1] = arr[i][3];
+	  P[idx][2] = arr[i][4];
+	  P[idx][3] = arr[i][5];
+	  P[idx][4] = arr[i][6];
+	  P[idx][5] = arr[i][7];
+	  Q[idx][0] = arr[i][8];
+	  Q[idx][1] = arr[i][9];
+	  Q[idx][2] = arr[i][10];
+	  Q[idx][3] = arr[i][11];
+	  Q[idx][4] = arr[i][12];
+	  Q[idx][5] = arr[i][13];
 
-      // Calculate the P and Q for the third atom.
+	  // Calculate the P and Q for the third atom.
 
-      P[i][6] = -(m1/m3) * P[i][0] - (m2/m3) * P[i][3];
-      P[i][7] = -(m1/m3) * P[i][1] - (m2/m3) * P[i][4];
-      P[i][8] = -(m1/m3) * P[i][2] - (m2/m3) * P[i][5];
+	  P[idx][6] = -(m1/m3) * P[idx][0] - (m2/m3) * P[idx][3];
+	  P[idx][7] = -(m1/m3) * P[idx][1] - (m2/m3) * P[idx][4];
+	  P[idx][8] = -(m1/m3) * P[idx][2] - (m2/m3) * P[idx][5];
 
-      Q[i][6] = -(m1/m3) * Q[i][0] - (m2/m3) * Q[i][3];
-      Q[i][7] = -(m1/m3) * Q[i][1] - (m2/m3) * Q[i][4];
-      Q[i][8] = -(m1/m3) * Q[i][2] - (m2/m3) * Q[i][5];
+	  Q[idx][6] = -(m1/m3) * Q[idx][0] - (m2/m3) * Q[idx][3];
+	  Q[idx][7] = -(m1/m3) * Q[idx][1] - (m2/m3) * Q[idx][4];
+	  Q[idx][8] = -(m1/m3) * Q[idx][2] - (m2/m3) * Q[idx][5];
+	}
     }
 
   fr.close();
@@ -634,6 +747,11 @@ void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
   for(int i=0; i<nsteps; i++)
     delete[] arr[i];
   delete[] arr;
+
+  if(i_Debug_Loc) Write(Debug," Number of repititions = ", nsteps - nsteps_ac);
   
+  nsteps = nsteps_ac;
+  
+  if(i_Debug_Loc) Write(Debug,"Exiting");
 }
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/

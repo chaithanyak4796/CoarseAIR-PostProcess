@@ -106,6 +106,11 @@ void Input_Class :: Read_Input(const std::string& Inp_fname)
   if(i_Debug_Loc) Write(Debug, "eps_LJ [J] = ",eps_LJ);
   if(i_Debug_Loc) Write(Debug, "sig_LJ [m] = ",sig_LJ);
 
+  std :: getline(finp,line);     // Blank line
+  std :: getline(finp,line);     // Comment
+  std :: getline(finp,line);     // write_path_out?
+  write_path_out = stoi(line);
+  if(i_Debug_Loc) Write(Debug,"Write path-specific output files? = ", write_path_out);
   
   if(i_Debug_Loc) Write(Debug,"Exiting");
 }

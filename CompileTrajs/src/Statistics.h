@@ -22,11 +22,15 @@ class Statistics
 	vector<vector<double> > Traj_En;
 
 	std :: string Proc_Dir;
+	std :: string Output_Dir;
 
 	FILE * ftraj;
 	std :: string fname_traj;
 	const char* ftraj_header;
 	const char* ftraj_format;
+
+	FILE * fC, *fL, *fD, *fN;
+	std :: string fname_L, fname_C, fname_D, fname_N;
 	
 	public:
 	
@@ -42,8 +46,10 @@ class Statistics
 	double Get_arr_matrix(int i, int j);
 	double Get_count_path(int path);
 	void Update_count(int path);
-	void WriteOutput(Trajectory* Traj);
+	void WriteOutput(Trajectory* Traj, Input_Class* Input);
 	void InitializeOutput_files(Input_Class* Input, int iP);
+
+	void Write_Count(Input_Class* Input);
 	
 	//void WriteOutput_Old(const std :: string& Dir);
 	void UpdatePath_Traj(int iPath, int iPES, int iP, int iT, double E1, double E2, double b1, double b2, double b1_max, double b2_max, double d1, double d2, double v, double j, double arr, double omega, double E_int, double T_OP);

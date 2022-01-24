@@ -236,37 +236,79 @@ void Statistics :: Process_Trajs(int iP, Input_Class* Input, int i_Debug_Loc)
   InitializeOutput_files(Input, iP);
   if(i_Debug_Loc) Write(Debug,"Done Initializing Output files");
   
-  int iT;
+  int iT, path_idx;
+  
   for (int i=0; i<NTraj; i++)
     {
-      if(i_Debug_Loc) Write("");
+      if(i_Debug_Loc) Write(" ");
       iT = int(Traj_tot[i][0]);
       Trajectory* Traj = new Trajectory;
       Traj->Initialize_Trajectory(i, Input, Traj_tot, PaQSol, arr_matrix);
-      /*if(Input->determine_pathway == 1 and Traj->recomb_check == 1)
+
+      // Determine reaction pathway
+      if(Input->determine_pathway == 1 and Traj->recomb_check == 1)
 	{
-	  Traj->Determine_pathway(Proc_Dir, Input);
-	}*/
-      WriteOutput(Traj);
+	  path_idx = Traj->Determine_pathway(Proc_Dir, Input, arr_matrix);
+	  Update_count(path_idx-1);
+	  UpdatePath_Traj( path_idx, Traj->iNode, Traj->iProc, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1, Traj->b2, Traj->b1_max, Traj->b2_max,
+			  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio );
+	}
+      WriteOutput(Traj, Input);
       delete Traj;
     }
 
   fclose(ftraj);
+  if(Input->write_path_out && Input->determine_pathway)
+    {
+      fclose(fL);
+      fclose(fC);
+      fclose(fD);
+      fclose(fN);
+    }
+
+  if (Input->determine_pathway)
+    Write_Count(Input);
   
   if(i_Debug_Loc) Write(Debug, "Exiting");
 }
 /**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
-void Statistics :: WriteOutput(Trajectory* Traj)
+void Statistics :: WriteOutput(Trajectory* Traj, Input_Class* Input)
 {
   // This function writes the output of the statistics class
   fprintf(ftraj, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
-	  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->recomb_check, Traj->E_int*Hartree_eV, Traj->tau);
+	  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+
+  if(Input->write_path_out && Input->determine_pathway)
+    {
+      if(Traj->path_idx == 0)
+	{
+	  fprintf(fN, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
+		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+	}
+      else if(Traj->path_idx == 1)
+	{
+	  fprintf(fL, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
+		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+	}
+      else if(Traj->path_idx == 2)
+	{
+	  fprintf(fC, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
+		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+	}
+      else if (Traj->path_idx == 3)
+	{
+	  fprintf(fD, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
+		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+	}
+    }
+  
 }
 /**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
 void Statistics :: InitializeOutput_files(Input_Class* Input, int iP)
 {
   // Overall Traj file
-  std :: string Output_Dir = Input->Main_Dir + Input->Bins_Dir + "Node_1/Proc_" + to_string(iP) + "/";
+  Output_Dir = Input->Main_Dir + Input->Bins_Dir + "Node_1/Proc_" + to_string(iP) + "/";
+  
   fname_traj = Output_Dir + "Trajectories-3B.out";
   ftraj      = fopen(fname_traj.c_str(),"w");
   if(!ftraj)
@@ -275,13 +317,65 @@ void Statistics :: InitializeOutput_files(Input_Class* Input, int iP)
       exit(0);
     }
 
-   ftraj_header = " iPES iProc  iTraj  E1[eV]    E2[eV]  b1_max[Bo]  b1[Bo]   b2_max[Bo] b2[Bo]    d1[Bo]    d2[Bo]       v         j         arr        omega   Path_idx E_int[eV]     tau_OP[s]\n";
-   ftraj_format = "%4d  %4d  %6d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E\n";
+   ftraj_header = " iPES iProc  iTraj  E1[eV]    E2[eV]  b1_max[Bo]  b1[Bo]   b2_max[Bo] b2[Bo]    d1[Bo]    d2[Bo]       v         j         arr        omega   Path_idx E_int[eV]     tau_OP[s]   ratio\n";
+   ftraj_format = "%4d  %4d  %6d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E  %5.4E\n";
 
   fprintf(ftraj,ftraj_header);
+
+  // Initializing the path specific trajectoru files
+  if(Input->write_path_out && Input->determine_pathway)
+    {
+      fname_L = Output_Dir + "Lindemann_Traj.out";
+      fname_C = Output_Dir + "Chaperon_Traj.out";
+      fname_D = Output_Dir + "Direct_Traj.out";
+      fname_N = Output_Dir + "No_Recomb_Traj.out";
+
+      fL = fopen(fname_L.c_str(), "w");
+      fC = fopen(fname_C.c_str(), "w");
+      fD = fopen(fname_D.c_str(), "w");
+      fN = fopen(fname_N.c_str(), "w");
+
+      if(!fC || !fL || !fD || !fN)
+	{
+	  Write(" Error opening path specific files ");
+	  exit(0);
+	}
+
+      fprintf(fL, ftraj_header);
+      fprintf(fC, ftraj_header);
+      fprintf(fD, ftraj_header);
+      fprintf(fN, ftraj_header);
+    }
+
 }
 /**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
+void Statistics :: Write_Count(Input_Class* Input)
+{
+  // Count file
+  std :: string fname_count = Output_Dir + "Count.out";
+  FILE * f_count;
+  f_count      = fopen(fname_count.c_str(),"w");
+  if(!f_count)
+    {
+      Write("Error opening file :", fname_count);
+      exit(0);
+    }
 
+  int f = 100;
+  int tot = 0;
+  for (int i=0; i<4; i++)
+    tot+= count_path[i];
+
+  // Write the count information
+  fprintf(f_count,"L : %5d  %6.4f\n", count_path[0],double(f*count_path[0])/tot);
+  fprintf(f_count,"C : %5d  %6.4f\n", count_path[1],double(f*count_path[1])/tot);
+  fprintf(f_count,"D : %5d  %6.4f\n", count_path[2],double(f*count_path[2])/tot);
+  fprintf(f_count,"N : %5d   ----\n", count_path[4],double(f*count_path[4])/tot);
+
+  fclose(f_count);
+}
+
+/**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
 /*void Statistics :: WriteOutput_Old(const std :: string& Dir)
 {
 	// This function writes the output of the statistics class

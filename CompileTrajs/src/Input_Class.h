@@ -19,6 +19,8 @@ class Input_Class
   double eps_LJ;
   double sig_LJ;
 
+  int write_path_out;    // Write path-specific output files?
+
   //public:
   Input_Class();
   void Read_Input(const std::string& Inp_fname);
