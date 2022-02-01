@@ -1,7 +1,7 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # Main Dir
-/media/chaithanya/Chaithanya_New/QCT_Output/Results/N3/Recombination/Rates/Pathway/Temp_12000K/T_12000_12000_0_10/
+/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Rates/Temp_18000K/T_18000_18000_0_1/
 
 # Bins_Dir
 Bins_10_0/
@@ -10,7 +10,7 @@ Bins_10_0/
 20
 
 # Determine Pathways ? 
-1
+0
 
 # Number of atoms
 3
@@ -18,11 +18,11 @@ Bins_10_0/
 # Atoms Names
 N
 N
-N
+O
 
 # LJ Params: eps (K) and sigma (Angs)
 78.0
 2.94
 
 # Write Path specific output files?
-1
+0

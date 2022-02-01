@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	Statistics* Stat = new Statistics;
 	//sleep(1);
 	Stat->Initialize_Statistics(iP, Input);
-	Stat->Process_Trajs(iP, Input, 1);
+	Stat->Process_Trajs(iP, Input, 0);
 	delete Stat;
     }
   }

@@ -75,7 +75,7 @@ void Input_Class :: Read_Input(const std::string& Inp_fname)
   std :: getline(finp,line);     // Comment
   std :: getline(finp,line);     // Poisson_treat
   Poisson_treat = stoi(line);
-  if(i_Debug_Loc) Write(Debug, "Poisso_treat = ", Poisson_treat);
+  if(i_Debug_Loc) Write(Debug, "Poisson_treat = ", Poisson_treat);
   
   std :: getline(finp,line);     // Blank line
   std :: getline(finp,line);     // Comment
@@ -110,7 +110,7 @@ void Input_Class :: Read_Input(const std::string& Inp_fname)
       if(i_Debug_Loc) Write(Debug,"Atoms_Masses[",i,"] = ",Atom_Masses[i]);
     }
     
-  std :: getline(finp,line);        // Blank line
+  /*std :: getline(finp,line);        // Blank line
   std :: getline(finp,line);        // Comment
   std :: getline(finp,levels_fname);  // levels_fname
   levels_fname = "./Input_files/" + levels_fname;
@@ -130,7 +130,7 @@ void Input_Class :: Read_Input(const std::string& Inp_fname)
   sig_LJ *= Angs_m;
 
   if(i_Debug_Loc) Write(Debug, "eps_LJ [J] = ",eps_LJ);
-  if(i_Debug_Loc) Write(Debug, "sig_LJ [m] = ",sig_LJ);
+  if(i_Debug_Loc) Write(Debug, "sig_LJ [m] = ",sig_LJ);*/
 
   std :: getline(finp,line);    // Blank line
   std :: getline(finp,line);    // Comment

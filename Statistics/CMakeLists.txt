@@ -18,14 +18,16 @@ set(SOURCES
     ${CMAKE_SOURCE_DIR}Main.h
     ${CMAKE_SOURCE_DIR}Input_Class.h
     ${CMAKE_SOURCE_DIR}Statistics.h 
+    ${CMAKE_SOURCE_DIR}Reactions.h
 
 ###### Functions #######
     ${CMAKE_SOURCE_DIR}Main.cpp
     ${CMAKE_SOURCE_DIR}Find_length.cpp
-    
+   
 ###### Classes #########
     ${CMAKE_SOURCE_DIR}Input_Class.cpp
     ${CMAKE_SOURCE_DIR}Statistics.cpp
+    ${CMAKE_SOURCE_DIR}Reactions.cpp
 )
 
 

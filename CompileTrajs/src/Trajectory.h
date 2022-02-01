@@ -5,6 +5,7 @@
 
 class Trajectory
 {
+  int i_Debug = 0;  // Global Debug flag; Can be over-ridden in individual functions
  public:
 	int iNode;
 	int iProc;
@@ -63,13 +64,19 @@ class Trajectory
 	double* Pini;      // Initial Velocities
 	double* Qini;      // Initial Positions
 
+	double* P1;   // Initial velocity of the COM of the pair A,B
+	double* Q1;   // Initial position of the COM of the pair A,B
+	double* P2;   // Initial velocity of C w.r.t COM of the pair A,B    
+	double* Q2;   // Initial position of C w.r.t COM of the pair A,B
+
 	double* Pfin;		// Final Velocities 
 	double* Qfin;           // Final Positions
 	double  H_fin;		// Final Hamiltonian	
 		
 	double mu1;      // Reduced mass of A and B 
-	double mu2;     // Reduced mass of AB and C
-	
+	double mu2;      // Reduced mass of AB and C
+	double M;        // Sum of the masses of A and B
+
 	vector<vector<double>> r_min;   // Array storing the internuclear distance when each pair reaches its minimum distance for the first time
 	vector<vector<double>> t_min;   // Array storing thhe time when each pair reaches its minimum distance for the first time
 	vector<vector<int>> i_min;   // Array storing the index

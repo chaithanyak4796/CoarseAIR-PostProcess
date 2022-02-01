@@ -2,16 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.close('all')
 
-Temp = 8000
+Temp = 10000
 #Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_" + str(Temp) + "_" + str(Temp) + "_0_0/"
 #fname = Dir + "trajectories-Tot.out"
 
-Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N3/Dissociation/Rates/Temp_" + str(Temp) +"K/T_" + str(Temp) + "_" + str(Temp) + "_" + str(1) + "/Bins_1_0/"
+Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Dissociation/Rates/Temp_" + str(Temp) +"K/T_" + str(Temp) + "_" + str(Temp) + "_" + str(1) + "/Bins_1_0/"
 fname = Dir + "trajectories.out"
 
 # Read the levels file
-levels_fname = './N2_levels.dat'
-data_levels = np.loadtxt(levels_fname,skiprows=15,usecols=(0,1,2))
+levels_fname = './N2_levels-N2O.dat'
+#data_levels = np.loadtxt(levels_fname,skiprows=15,usecols=(0,1,2))
+data_levels = np.loadtxt(levels_fname,skiprows=4,usecols=(0,1,2),delimiter=',')
+
 NLevels = len(data_levels)
 print(" Number of levels = ",NLevels)
 

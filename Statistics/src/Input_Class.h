@@ -9,23 +9,19 @@ class Input_Class
   
   std :: string Source_Dir;
   std :: string Temp_pref;
-  std :: string levels_fname;
   
   double Temp;       // Temperature
   double omega_min;  // Range of omega (Min)
   double omega_max;  // Range of omega (Max)
   double case_beg;   // Case_idx (beg)
   double case_end;   // Case_idx (end)
-  int ncases;        // Number of cases
+  int    ncases;     // Number of cases
   
   int NProcs;   // Number of processors
   int NAtoms;  // Number of atoms
 
-  char* Atom_Names;     // Name of atoms
-  double* Atom_Masses;  // Mass of the atoms
-
-  double eps_LJ;
-  double sig_LJ;
+  char*   Atom_Names;     // Name of atoms
+  double* Atom_Masses;    // Mass of the atoms
 
   int resolve_path;           // Resolve recombination pathways?
 

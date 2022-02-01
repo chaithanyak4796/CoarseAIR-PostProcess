@@ -45,6 +45,7 @@ void Statistics :: Initialize_Statistics(int iP, Input_Class* Input)
 	// This function initializes the variable members of this class.
 	int i_Debug_Loc = 1;
 	std :: string Debug = " [Initialize Statistics] :";
+	if(i_Debug_Loc) Write(" ");
 	if(i_Debug_Loc) Write(Debug,"Entering");
 	if(i_Debug_Loc) Write(Debug,"Initializing Statistics for iProc = ",iP);
 	
@@ -370,7 +371,7 @@ void Statistics :: Write_Count(Input_Class* Input)
   fprintf(f_count,"L : %5d  %6.4f\n", count_path[0],double(f*count_path[0])/tot);
   fprintf(f_count,"C : %5d  %6.4f\n", count_path[1],double(f*count_path[1])/tot);
   fprintf(f_count,"D : %5d  %6.4f\n", count_path[2],double(f*count_path[2])/tot);
-  fprintf(f_count,"N : %5d   ----\n", count_path[4],double(f*count_path[4])/tot);
+  fprintf(f_count,"N : %5d   ----\n", count_path[4]);
 
   fclose(f_count);
 }

@@ -55,10 +55,6 @@ Trajectory:: Trajectory()  // Constructor
   j   = 0;
   arr = 0;
 
-  //mu1_2  = m1*m2/(m1+m2);
-  //mu12_3 = (m1+m2)*m3/(m1+m2+m3);
-
-
   cmplx_id = -1;
 
   path_idx = 0;
@@ -90,7 +86,8 @@ Trajectory :: ~Trajectory() // Destructor
 
 void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Traj_tot, double** PaQSol, double** arr_matrix)
 {
-  int i_Debug_Loc = 1;
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 1;
   std :: string Debug = "   [Initialize_Trajectory] :";
   if(i_Debug_Loc) Write(Debug, "Entering");
 
@@ -117,6 +114,7 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
 
   mu1 = m1*m2/(m1+m2);
   mu2 = (m1+m2)*m3/(m1+m2+m3);
+  M = m1 + m2;
 
   if(i_Debug_Loc) Write(Debug,"Initializing Traj # ",i,",iTraj = ",iTraj);
   if(i_Debug_Loc) Write(Debug,"Before adjusting QNs: v =",v,"j =",j);
@@ -141,6 +139,11 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
   Pfin = new double [NCoords];
   Qfin = new double [NCoords];
 
+  P1 = new double [NCoords];
+  P2 = new double [NCoords];
+  Q1 = new double [NCoords];
+  Q2 = new double [NCoords];
+
   for(int p=0; p<NCoords; p++)
     {
       Pini[p] = 0;
@@ -157,12 +160,23 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
       Qfin[p] = PaQSol[i][p+22];
     }
 
+  // Compute initial PaQ of the 3rd atom
   for (int p=0; p<3; p++)
     {
       Pini[p+6] = -1*(Input->Atom_Masses[0]*Pini[p] + Input->Atom_Masses[1]*Pini[p+3])/Input->Atom_Masses[2];
       Qini[p+6] = -1*(Input->Atom_Masses[0]*Qini[p] + Input->Atom_Masses[1]*Qini[p+3])/Input->Atom_Masses[2];
       Pfin[p+6] = -1*(Input->Atom_Masses[0]*Pfin[p] + Input->Atom_Masses[1]*Pfin[p+3])/Input->Atom_Masses[2];
       Qfin[p+6] = -1*(Input->Atom_Masses[0]*Qfin[p] + Input->Atom_Masses[1]*Qfin[p+3])/Input->Atom_Masses[2];
+    }
+
+  // Compute the initial P1,P2 and Q1,Q2
+  for(int p=0; p<3; p++)
+    {
+      P1[p] = ( m1*Pini[p] + m2*Pini[p+3] )/M;
+      Q1[p] = ( m1*Qini[p] + m2*Qini[p+3] )/M;
+
+      P2[p] = Pini[p+6] - P1[p];
+      Q2[p] = Qini[p+6] - Q1[p];
     }
 
   H_fin = PaQSol[i][15];
@@ -179,7 +193,7 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
 
   // Calculate the relative translational energies
   E1 = pow((Pini[0] - Pini[3]),2) + pow((Pini[1] - Pini[4]),2) + pow((Pini[2] - Pini[5]),2);
-  E2 = pow((0.5*(Pini[0]+Pini[3]) - Pini[6]),2) + pow((0.5*(Pini[1]+Pini[4]) - Pini[7]),2) + pow((0.5*(Pini[2]+Pini[5]) - Pini[8]),2);
+  E2 = pow(P2[0],2) + pow(P2[1],2) + pow(P2[2],2);
 
   E1 *= 0.5 * mu1;
   E2 *= 0.5 * mu2;
@@ -194,8 +208,8 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
     {
       R1[p] = Qini[p] - Qini[p+3];
       V1[p] = Pini[p] - Pini[p+3];
-      R2[p] = Qini[p+6] - 0.5*(Qini[p] + Qini[p+3]);
-      V2[p] = Pini[p+6] - 0.5*(Pini[p] + Pini[p+3]);
+      R2[p] = Q2[p];
+      V2[p] = P2[p];
     }
 
   ct1 = pow(dot(R1,V1),2)/(dot(R1,R1)*dot(V1,V1));
@@ -223,40 +237,48 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
       path_idx = 1; // In case we check the recombination pathways, this will be updated again.
       
       int mol1,mol2,mol3;
+      double m_int_1, m_int_2, m_int_3;
+
       mol1 = -1; mol2 = -1; mol3 = -1;
       if( arr == arr_matrix[0][0] || arr == arr_matrix[0][1] || arr == arr_matrix[0][2] )
 	{
-	  mol1 = 0;
-	  mol2 = 3;
-	  mol3 = 6;
+	  mol1 = 0; m_int_1 = m1;
+	  mol2 = 3; m_int_2 = m2;
+	  mol3 = 6; m_int_3 = m3;
 	}
       if( arr == arr_matrix[1][0] || arr == arr_matrix[1][1] || arr == arr_matrix[1][2] )
 	{
-	  mol1 = 0;
-	  mol2 = 6;
-	  mol3 = 3;
+	  mol1 = 0; m_int_1 = m1;
+	  mol2 = 6; m_int_2 = m3;
+	  mol3 = 3; m_int_3 = m2;
 	}
       if( arr == arr_matrix[2][0] || arr == arr_matrix[2][1] || arr == arr_matrix[2][2] )
 	{
-	  mol1 = 3;
-	  mol2 = 6;
-	  mol3 = 0;
+	  mol1 = 3; m_int_1 = m2;
+	  mol2 = 6; m_int_2 = m3;
+	  mol3 = 0; m_int_3 = m1;
 	}
 
       if(i_Debug_Loc) Write(Debug,"mol1 = ",mol1,", mol2 = ",mol2,", mol3 = ",mol3);
 
       E_int = 0;
-      double V2_CM = 0;
-
-      double E_3 = 0;
+      double E_CM  = 0;   // Translational energy of the molecule
+      double E_3   = 0;   // Translational energy of the atom
+      double m_CM  = m_int_1 + m_int_2; // Mass of the molecule
+      double V_CM[3]  = {0,0,0};           // COM  of the molecule
 
       for (int p=0; p<3; p++)
 	{
-	  E_3+= pow(Pfin[p+mol3],2);
-	  V2_CM+= pow(0.5*(Pfin[p+mol1]+Pfin[p+mol2]),2);
+	  E_3+= 0.5 * m_int_3 * pow(Pfin[p+mol3],2);
+	  V_CM[p] = (m_int_1 * Pfin[p+mol1] + m_int_2 * Pfin[p+mol2])/(m_CM);
 	}
 
-      E_int = H_fin - 0.5*m1*E_3 - 0.5*(2*m1)*V2_CM;
+      for(int p=0; p<3; p++)
+	{
+	  E_CM += 0.5 * m_CM * pow(V_CM[p],2);
+	}
+
+      E_int = H_fin - E_3 - E_CM;
     }
   else
     {
@@ -267,7 +289,7 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
 
   // Calculate the initial distances
   d1 = pow(Qini[0] - Qini[3],2) + pow(Qini[1] - Qini[4],2) + pow(Qini[2] - Qini[5],2);
-  d2 = pow(Qini[6] - 0.5*(Qini[0]+Qini[3]),2) + pow(Qini[7] - 0.5*(Qini[1]+Qini[4]),2) + pow(Qini[8] - 0.5*(Qini[2]+Qini[5]),2);
+  d2 = pow(Qini[6] - Q1[0],2)  + pow(Qini[7] - Q1[1],2)  + pow(Qini[8] - Q1[2],2);
 
   d1 = pow(d1,0.5);
   d2 = pow(d2,0.5);
@@ -291,7 +313,8 @@ void Trajectory :: Initialize_Trajectory(int i, Input_Class* Input, double** Tra
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 void Trajectory :: Eval_tau(double e_LJ, double sigma_LJ)
 {
-  int i_Debug_Loc = 0;
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 0;
   std :: string Debug = "   [Eval_tau] :";
 
   long double mass = mu1*me;
@@ -311,7 +334,8 @@ void Trajectory :: Eval_tau(double e_LJ, double sigma_LJ)
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 void Trajectory :: Calc_Traj_Params()
 {
-  int i_Debug_Loc = 0;
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 0;
   std :: string Debug = "  [Calc_Traj_Params]";
 
   if(i_Debug_Loc) Write(Debug,"Entering");
@@ -319,11 +343,11 @@ void Trajectory :: Calc_Traj_Params()
   // Calculating omega
   double t1,t2;
   double r1[3]  = {Qini[3]-Qini[0], Qini[4]-Qini[1], Qini[5]-Qini[2]};
-  double rcm[3] = {0.5*(Qini[3]+Qini[0]), 0.5*(Qini[4]+Qini[1]), 0.5*(Qini[5]+Qini[2])};
+  double rcm[3] = {Q1[0], Q1[1], Q1[2]};
   double r2[3]  = {Qini[6]-rcm[0], Qini[7]-rcm[1], Qini[8]-rcm[2]};
 
   double v1[3]  = {Pini[3]-Pini[0], Pini[4]-Pini[1], Pini[5]-Pini[2]};
-  double vcm[3] = {0.5*(Pini[3]+Pini[0]), 0.5*(Pini[4]+Pini[1]), 0.5*(Pini[5]+Pini[2])};
+  double vcm[3] = {P1[0], P1[1], P1[2]};
   double v2[3]  = {Pini[6]-vcm[0], Pini[7]-vcm[1], Pini[8]-vcm[2]};
 
   t1 = -dot(r1,v1)/(dot(v1,v1));
@@ -342,7 +366,8 @@ void Trajectory :: Calc_Traj_Params()
 void Trajectory :: Adjust_QN()
 {
 	// This function adjusts the quantum numbers for the trajectories.
-	int i_Debug_Loc = 0;
+        int i_Debug_Loc = i_Debug; 
+	//int i_Debug_Loc = 0;
 	std :: string Debug = "  [Adjust QN] :";
 	
 	if(i_Debug_Loc) Write(Debug,"Entering");
@@ -429,7 +454,8 @@ void Trajectory :: Adjust_QN()
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 int Trajectory :: Determine_pathway(std :: string Proc_Dir, Input_Class* Input, double** arr_matrix)
 {
-  int i_Debug_Loc = 1;
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 1;
   std :: string Debug = " [Determine pathway] :";
   if(i_Debug_Loc) Write(Debug,"Entering");
 
@@ -502,7 +528,8 @@ int Trajectory :: Determine_pathway(std :: string Proc_Dir, Input_Class* Input, 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 int Trajectory :: Check_Direct()
 {
-  int i_Debug_Loc = 1;
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 1;
   int direct_check = 0 ;
 
   std :: string Debug = "  [Check_Direct_New]  :";
@@ -563,8 +590,9 @@ void Trajectory :: Determine_complex(double t_first_idx[3])
 {
   // This function determines the id of the OP
   // It looks for the first time stamp when each atoms face a force and identifies the pair that feels the same force at that time.
-
-  int i_Debug_Loc = 0;
+  
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 0;
   std :: string Debug = "   [Determine_cmplx_new]  :";
   if(i_Debug_Loc) Write(Debug,"Entering");
 
@@ -672,7 +700,8 @@ void Trajectory :: Calc_acceleration(int method)
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
 void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
 {
-  int i_Debug_Loc = 1;
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 1;
   std :: string Debug = " [Read_PaQEvo] :";
   if(i_Debug_Loc) Write(Debug,"Entering");
   

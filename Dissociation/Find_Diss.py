@@ -1,16 +1,21 @@
 import numpy as np
 import sys
 
-system = "N3"
+system = "N2O"
 
 Kb = 3.166829E-6  # Ha/K
 if (system == "O3"):
     m1 = 29148.94559  # me
+    m2 = m1
+    m3 = m1
 elif(system == "N3"):
     m1 = 25526.04298
-
-m2 = m1
-m3 = m1
+    m2 = m1
+    m3 = m1
+elif(system == "N2O"):
+    m1 = 25526.04298
+    m2 = m1
+    m3 = 29148.94559
 
 au_s = 2.4188843265E-17
 bo_Angs = 0.529177249
@@ -21,7 +26,7 @@ if (len(sys.argv) == 2):
 else:
     Temp = 10000
 
-case = [1,2,3,4,5,6,7,8,9,10]
+case = [1,2,3,4]
 
 for c in range(len(case)):
     # Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_" + str(Temp) + "_" + str(Temp) + "_0_" + str(case[c]) + "/"
@@ -101,7 +106,10 @@ if(system == "O3"):
     adiabatic_corr = 16/3
     symm_fac = 1.0
 
-else: 
+elif(system == "N3"): 
+    adiabatic_corr = 1.0
+    symm_fac = 1.0
+elif(system == "N2O"):
     adiabatic_corr = 1.0
     symm_fac = 1.0
 
