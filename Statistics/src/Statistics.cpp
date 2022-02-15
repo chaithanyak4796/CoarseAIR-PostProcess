@@ -174,10 +174,10 @@ void Statistics :: Compute_Probabilities()
       //========================================= Identify all the final states =============================================================//
       if(i_Debug_St) Write(Debug, "iTraj = ", iTraj);
 
-      vib = int(Traj[iTraj][11]);
-      rot = int(Traj[iTraj][12]);
+      vib = int(Traj[iTraj][9]);
+      rot = int(Traj[iTraj][10]);
       istate = vjtoi(vib,rot);
-      arr = Traj[iTraj][13];
+      arr = Traj[iTraj][11];
 
       if(istate >= 0)    // Only bound states (non-recombined products have been assigned v=j=-1)
 	{
@@ -293,14 +293,14 @@ void Statistics :: Compute_Probabilities()
       //================================= Identify the boxes to which this trajectory belongs ===========================================================//
       b1 = Traj[iTraj][6];
       b2 = Traj[iTraj][8];
-      om = Traj[iTraj][14];
-      pid = int(Traj[iTraj][15]);
+      om = Traj[iTraj][12];
+      pid = int(Traj[iTraj][13]);
 
-      vib = int(Traj[iTraj][11]);
-      rot = int(Traj[iTraj][12]);
-      arr = Traj[iTraj][13];
+      vib = int(Traj[iTraj][9]);
+      rot = int(Traj[iTraj][10]);
+      arr = Traj[iTraj][11];
 
-      tau = Traj[iTraj][17]/au_s;   // converting from s to atomic units
+      tau = Traj[iTraj][15]/au_s;   // converting from s to atomic units
 
       istate = vjtoi(vib,rot);    // If you want to only resolve vibrationally, pass rot = 0
 
@@ -339,7 +339,7 @@ void Statistics :: Compute_Probabilities()
 				  if(itr == FinState[reac_id].end())
 				    {
 				      if(i_Debug_Loc) Write(Debug,"Error: This state not identified earlier. Stopping. istate=",istate);
-				      if(i_Debug_Loc) Write(Debug," iNode = ",Traj[iTraj][0],"iProc = ",Traj[iTraj][1],"iTraj = ",Traj[iTraj][2]);
+				      if(i_Debug_Loc) Write(Debug,"iProc = ",Traj[iTraj][1],"iTraj = ",Traj[iTraj][2]);
 				      exit(0);
 				    }
 				  else
@@ -359,7 +359,7 @@ void Statistics :: Compute_Probabilities()
 
 				      count++;
 				      StateCount[reac_id][s][0]++;
-				      StateCount[reac_id][s][1] = int(Traj[iTraj][13]) % 16; 
+				      StateCount[reac_id][s][1] = int(Traj[iTraj][11]) % 16; 
 				      StateCount[reac_id][s][i3+2]++;
 				    }
 				  
@@ -818,7 +818,7 @@ void Statistics :: Read_Traj_tot()
 	{
 	  ftraj>>Traj[i][j];
 	}
-      if(Traj[i][15] > 0)  // Path_id
+      if(Traj[i][13] > 0)  // Path_id
 	NRec++;
     }
   ftraj.close();

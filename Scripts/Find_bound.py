@@ -90,16 +90,20 @@ def Prob_Omega(Dir,Om):
 
     b1_tot = Data[:,2]
     b2_tot = Data[:,4]
-    v  = Data[:,10]
-    j  = Data[:,9]
+    v      = Data[:,10]
+    j      = Data[:,9]
+    arr    = Data[:,11]
 
     n = len(b1_tot)
 
     b1 = []
     b2 = []
 
+    reac_arr = np.array([[16.5,17.5,19.5],[32.5,33.5,35.5],[48.5,49.5,51.5]])
+
     for i in range(n):
-        if(v[i] > 0.5 and j[i] > 0.5):
+        #if(v[i] > 0.5 and j[i] > 0.5):
+        if(arr[i] in reac_arr[0]):
             b1.append(b1_tot[i])
             b2.append(b2_tot[i])
             
@@ -108,10 +112,12 @@ def Prob_Omega(Dir,Om):
 E1 = 100
 E2 = 200
 Temp = str(E1) + "_" + str(E2)
-Dir="/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_"+Temp+"_"
+#Dir="/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_"+Temp+"_"
+Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
+#Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
 
 #Omega = [-100,-90,-80,-70,-60,-50,-40,-30,-20,-10,0,10,20,30,40,50,60,70,80,90,100]
-Omega = [60]
+Omega = [-100, -80, -60, -40, -20, -10, 0, 10, 20, 40, 60, 80, 100]
 
 Prob = []
 if(case == 2):

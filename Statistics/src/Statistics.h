@@ -8,7 +8,7 @@ using namespace std;
 class Statistics
 {
   
-  int ncols = 19;   // Number of columns in Traj file
+  int ncols = 16;   // Number of columns in Traj file
   
   int n_paths;
   int NTraj;

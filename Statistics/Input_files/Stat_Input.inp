@@ -1,7 +1,7 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #Source_Directory
-/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Rates/Temp_18000K/
+/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Rates/Pathway/Temp_18000K/
 
 #Temperature [K]
 18000.0
@@ -12,7 +12,7 @@
 
 #Case No. (suffix) Beg,End
 1
-1
+10
 
 # How to treat f(omega)? 0: f(omega) = 1; f(omega) -> Poisson Distribution but Tau_coll = 1
 1
@@ -29,4 +29,4 @@ N
 O
 
 # Resolve Pathways? 0: No; 1: Yes
-0
+1

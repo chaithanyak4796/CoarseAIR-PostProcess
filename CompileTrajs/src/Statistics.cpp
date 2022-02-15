@@ -277,29 +277,29 @@ void Statistics :: WriteOutput(Trajectory* Traj, Input_Class* Input)
 {
   // This function writes the output of the statistics class
   fprintf(ftraj, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
-	  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+	  Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau);
 
   if(Input->write_path_out && Input->determine_pathway)
     {
       if(Traj->path_idx == 0)
 	{
 	  fprintf(fN, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
-		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+		  Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau);
 	}
       else if(Traj->path_idx == 1)
 	{
 	  fprintf(fL, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
-		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+		  Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau);
 	}
       else if(Traj->path_idx == 2)
 	{
 	  fprintf(fC, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
-		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+		  Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau);
 	}
       else if (Traj->path_idx == 3)
 	{
 	  fprintf(fD, ftraj_format, Traj->iPES, Traj->iProc, Traj->iTraj, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1_max, Traj->b1, Traj->b2_max, Traj->b2,
-		  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio);
+		  Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau);
 	}
     }
   
@@ -318,8 +318,8 @@ void Statistics :: InitializeOutput_files(Input_Class* Input, int iP)
       exit(0);
     }
 
-   ftraj_header = " iPES iProc  iTraj  E1[eV]    E2[eV]  b1_max[Bo]  b1[Bo]   b2_max[Bo] b2[Bo]    d1[Bo]    d2[Bo]       v         j         arr        omega   Path_idx E_int[eV]     tau_OP[s]   ratio\n";
-   ftraj_format = "%4d  %4d  %6d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E  %5.4E\n";
+   ftraj_header = " iPES iProc  iTraj   E1[eV]    E2[eV]  b1_max[Bo]  b1[Bo]  b2_max[Bo]  b2[Bo]       v          j        arr        omega   Path_idx E_int[eV]     tau_OP[s]\n";
+   ftraj_format = "%4d  %4d  %6d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E\n";
 
   fprintf(ftraj,ftraj_header);
 
