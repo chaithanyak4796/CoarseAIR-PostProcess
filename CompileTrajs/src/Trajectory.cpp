@@ -784,3 +784,97 @@ void Trajectory :: Read_PaQEvo(std :: string fname, Input_Class* Input)
   if(i_Debug_Loc) Write(Debug,"Exiting");
 }
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+void Trajectory :: Evaluate_SAI()
+{
+  int i_Debug_Loc = i_Debug;
+  //int i_Debug_Loc = 1;
+  std :: string Debug = " [Evaluate_SAI] :";
+  if(i_Debug_Loc) Write(Debug,"Entering");
+
+  n_rev = 0;
+
+  int p1, p2;
+  
+  if(cmplx_id == 0)
+    {
+      p1 = 0; p2 = 3;
+    }
+  else if (cmplx_id == 1)
+    {
+      p1 = 0; p2 = 6;
+    }
+  else
+    {
+      p1 = 3; p2 = 6;
+    }
+
+  double vel_ini1[3] = {P[0][p1], P[0][p1+1], P[0][p1+2]};
+  double vel_ini2[3] = {P[0][p2], P[0][p2+1], P[0][p2+2]};
+
+  double vel_fin1[3], vel_fin2[3];
+  double rel_ini[3], rel_fin[3];
+
+  double temp;
+  
+  for (int j=0; j<3; j++)
+    rel_ini[j] = vel_ini2[j] - vel_ini1[j];
+  
+  for (int i=1; i<nsteps-1; i++)
+    {
+      for (int j=0; j<3; j++)
+	{
+	  vel_fin1[j] = P[i][p1+j];
+	  vel_fin2[j] = P[i][p2+j];
+
+	  rel_fin[j] = vel_fin2[j] - vel_fin1[j];
+	}
+      temp = comp_angle(rel_ini, rel_fin);
+
+      if(SAI >= 1.5*M_PI && SAI < 2*M_PI)  // If SAI is in the 4th quadrant
+	{
+	  if (temp < 0.5*M_PI) // and completes on revolution
+	    {
+	      n_rev++;
+	    }
+	}
+
+      SAI = temp;
+
+      if(t[i] >= t_3B/au_ps)   // Impact
+	break;
+    }
+
+  SAI += n_rev * 2 * M_PI;
+
+  if(i_Debug_Loc) Write("SAI = ", SAI);
+  if(i_Debug_Loc) Write(Debug,"Exiting");
+}
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+double Trajectory :: comp_angle(double v1[3], double v2[3])
+{
+  // Computes the angle betweeen two vectors in the same plane
+  // Angle will be in the range of [0,2*pi)
+  
+  double cross_prod[3];
+  double dot_prod  = 0;
+  double cross_mag = 0;
+
+  cross_prod[0] = v1[1]*v2[2] - v1[2]*v2[1];
+  cross_prod[1] = v1[2]*v2[0] - v1[0]*v2[2];
+  cross_prod[2] = v1[0]*v2[1] - v1[1]*v2[0];
+
+  for (int i=0; i<3; i++)
+    {
+      cross_mag += pow(cross_prod[i],2);
+      dot_prod  += v1[i] * v2[i];
+    }
+
+  cross_mag = sqrt(cross_mag);
+
+  double theta = atan2(cross_mag, dot_prod);
+  if(theta < 0)
+    theta += 2*M_PI;
+
+  return theta;
+}

@@ -29,8 +29,11 @@ class Statistics
 	const char* ftraj_header;
 	const char* ftraj_format;
 
-	FILE * fC, *fL, *fD, *fN;
-	std :: string fname_L, fname_C, fname_D, fname_N;
+	const char* fmisc_header;
+	const char* fmisc_format;
+	
+	FILE * fC, *fL, *fD, *fN, *f_misc;
+	std :: string fname_L, fname_C, fname_D, fname_N, fname_misc;
 	
 	public:
 	

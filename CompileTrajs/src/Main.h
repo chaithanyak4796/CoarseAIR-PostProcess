@@ -26,16 +26,6 @@ void Delete_Proc_files(const std :: string& file_name, int del);
 void Merge_files(const std :: string& Proc_pref, int NProcs, const std :: string& Output_Dir, const std :: string& file_name, int del_Proc_files);
 void Merge_Count_files(const std :: string& Proc_pref, int NProcs, const std :: string& Output_Dir, int del_Proc_files);
 
-//void Read_PaQEvo(const std :: string& file_name, int n_t, double* t, double** P, double ** Q, double *V);
-
-//void Calc_inter_dist(int n_t, double* t, double** Q, double** R);
-
-//void Read_Traj_Tot(const std :: string& file_name, int nTraj, double** Traj);
-//void Read_Traj_Tot(const std :: string& file_name, int nTraj, vector<vector<double>>& Traj);
-
-//void Read_PaQ_Sol(const std :: string& file_name, int iProc, vector<vector<double>>& PaQSol);
-
-//void Read_QEvo(const std :: string& file_name, int n_t, double* t, double ** Q);
 
 double static get_diff(double a, double b, double c)
 {

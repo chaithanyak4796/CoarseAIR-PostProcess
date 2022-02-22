@@ -253,6 +253,11 @@ void Statistics :: Process_Trajs(int iP, Input_Class* Input, int i_Debug_Loc)
 	  Update_count(path_idx-1);
 	  UpdatePath_Traj( path_idx, Traj->iNode, Traj->iProc, Traj->E1*Hartree_eV, Traj->E2*Hartree_eV, Traj->b1, Traj->b2, Traj->b1_max, Traj->b2_max,
 			  Traj->d1, Traj->d2, Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->E_int*Hartree_eV, Traj->tau, Traj->ratio );
+
+	  if(Input->write_misc == 1)  // Compute and write SAI, ratio of time scales
+	    {
+	      Traj->Evaluate_SAI();
+	    }
 	}
       WriteOutput(Traj, Input);
       delete Traj;
@@ -269,6 +274,9 @@ void Statistics :: Process_Trajs(int iP, Input_Class* Input, int i_Debug_Loc)
 
   if (Input->determine_pathway)
     Write_Count(Input);
+
+  if(Input->determine_pathway && Input->write_misc)
+    fclose(f_misc);
   
   if(i_Debug_Loc) Write(Debug, "Exiting");
 }
@@ -302,7 +310,11 @@ void Statistics :: WriteOutput(Trajectory* Traj, Input_Class* Input)
 		  Traj->v, Traj->j, Traj->arr, Traj->omega, Traj->path_idx, Traj->E_int*Hartree_eV, Traj->tau);
 	}
     }
-  
+
+  if(Input->determine_pathway && Input->write_misc && Traj->recomb_check)
+    {
+      fprintf(f_misc, fmisc_format, Traj->iProc, Traj->iTraj, Traj->SAI, Traj->ratio, Traj->cmplx_id, Traj->omega);
+    }
 }
 /**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
 void Statistics :: InitializeOutput_files(Input_Class* Input, int iP)
@@ -348,6 +360,23 @@ void Statistics :: InitializeOutput_files(Input_Class* Input, int iP)
       fprintf(fN, ftraj_header);
     }
 
+  if(Input->determine_pathway && Input->write_misc)
+    {
+      fname_misc = Output_Dir + "Misc.out";
+      f_misc     = fopen(fname_misc.c_str(), "w");
+
+      if(!f_misc)
+	{
+	  Write(" Error opening file : ", fname_misc);
+	  exit(0);
+	}
+
+      fmisc_header = " iProc  iTraj   SAI[rad]     ratio      cmplx_id    omega\n";
+      fmisc_format = "%4d  %6d  %8.4E  %8.4E     %1d  %8.4E\n";
+
+      fprintf(f_misc, fmisc_header);
+    }
+
 }
 /**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
 void Statistics :: Write_Count(Input_Class* Input)
@@ -375,257 +404,6 @@ void Statistics :: Write_Count(Input_Class* Input)
 
   fclose(f_count);
 }
-
-/**-------------------------------------------------------------------------------------------------------------------------------------------------------**/
-/*void Statistics :: WriteOutput_Old(const std :: string& Dir)
-{
-	// This function writes the output of the statistics class
-	int i_Debug_Loc = 1;
-	std :: string Debug = "  [WriteOutput]";
-	
-	if(i_Debug_Loc) Write(Debug,"Entering");
-	
-	if(i_Debug_Loc) Write(Debug,"Writing to :",Dir);
-	
-	struct stat buffer;
-	int Dir_exist = stat ((Dir).c_str(), &buffer);
-	
-	if(Dir_exist != 0)
-	{
-		if(i_Debug_Loc) Write(Debug,"Directory does not exist. Attempting to create.");
-		int Dir_cr = mkdir((Dir).c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		
-		if(!Dir_cr)
-		{
-			if(i_Debug_Loc) Write(Debug,"Directory successfully created.");
-		}
-		else
-		{
-			if(i_Debug_Loc) Write(Debug,"Unable to create Directory :",Dir);
-			exit(0);
-		}
-	}
-	
-	else
-	{
-		if(i_Debug_Loc) Write(Debug,"Directory Exists");
-	}
-	
-	if(i_Debug_Loc) Write(Debug,"Moving Files now");
-	
-	double tot = 0;
-	for (int i =0; i<4; i++)   // Counting the total number of recombinations
-	{
-		tot+= count_path[i];
-	}
-	
-	if(i_Debug_Loc) Write(Debug,"Total number of recombination trajectories =",tot);
-	
-    std :: string fname_count = Dir + "Count.out";
-    std :: string fname_L     = Dir + "Lindemann_Traj.out";
-    std :: string fname_C     = Dir + "Chaperon_Traj.out";
-    std :: string fname_D     = Dir + "Direct_Traj.out";
-    std :: string fname_O     = Dir + "Others_Traj.out";
-    std :: string fname_U     = Dir + "Unconverged_Traj.out";
-    std :: string fname_B     = Dir + "Bad_Initial_Cond_Traj.out";
-    std :: string fname_N     = Dir + "No_Recomb_Traj.out";
-    std :: string fname_En    = Dir + "Recomnb_Energy.out";
-
-    FILE * fc;
-    FILE * fL;
-    FILE * fC;
-    FILE * fD;
-    FILE * fO;
-    FILE * fU;
-    FILE * fB;
-    FILE * fN;
-    FILE * fE;
-    
-    fc = fopen(fname_count.c_str(),"w");
-    fL = fopen(fname_L.c_str(),"w");
-    fC = fopen(fname_C.c_str(),"w");
-    fD = fopen(fname_D.c_str(),"w");
-    fO = fopen(fname_O.c_str(),"w");
-    fU = fopen(fname_U.c_str(),"w");
-    fB = fopen(fname_B.c_str(),"w");
-    fN = fopen(fname_N.c_str(),"w");
-    fE = fopen(fname_En.c_str(),"w");
-
-	if(!fc)
-	{
-		Write(Debug,"Error opening file :",fname_count);
-		exit(0);
-	}
-	
-	if(!fL)
-	{
-		Write(Debug,"Error opening file :",fname_L);
-		exit(0);
-	}
-	
-	if(!fC)
-	{
-		Write(Debug,"Error opening file :",fname_C);
-		exit(0);
-	}
-	
-	if(!fD)
-	{
-		Write(Debug,"Error opening file :",fname_D);
-		exit(0);
-	}
-	
-	if(!fO)
-	{
-		Write(Debug,"Error opening file :",fname_U);
-		exit(0);
-	}
-	
-	if(!fU)
-	{
-		Write(Debug,"Error opening file :",fname_U);
-		exit(0);
-	}
-	
-	if(!fB)
-	{
-		Write(Debug,"Error opening file :",fname_B);
-		exit(0);
-	}
-	
-	if(!fN)
-	{
-		Write(Debug,"Error opening file :",fname_N);
-		exit(0);
-	}
-	
-	if(!fE)
-	{
-	        Write(Debug,"Error opening file :",fname_En);
-		exit(0);
-	}
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the count file :",fname_count);
-	
-	int f = 100;
-	// Write the count information
-	fprintf(fc,"L : %5d  %6.4f\n", count_path[0],double(f*count_path[0])/tot);
-	fprintf(fc,"C : %5d  %6.4f\n", count_path[1],double(f*count_path[1])/tot);
-	fprintf(fc,"D : %5d  %6.4f\n", count_path[2],double(f*count_path[2])/tot);
-	fprintf(fc,"O : %5d  %6.4f\n", count_path[3],double(f*count_path[3])/tot);
-	fprintf(fc,"N : %5d   ----\n", count_path[4],double(f*count_path[4])/tot);
-	fprintf(fc,"U : %5d   ----\n", count_path[5]);
-	fprintf(fc,"B : %5d   ----\n", count_path[6]);
-	
-	if(i_Debug_Loc) Write(Debug,"Done writing the count file :",fname_count);
-	
-	//const char* format = "%d  %4d  %5d  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %4.3E  %+6.4E  %2d\n";
-	//const char* format = "%4d  %4d  %5d  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %10.6E  %+10.6E  %2d\n";
-	const char* format = "%4d  %4d  %5d  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %5.2E  %+5.2E  %+5.2E  %5.2E  %+6.4E  %2d    %+6.3E   %6.8E\n";
-	//const char* header = "iNode iProc iTraj      Erel[eV]   Erel_3B[eV]  b1_max[Bohr]      b1[Bohr]  b2_max[Bohr]     b2[Bohr]      d1[Bohr]      d2[Bohr]     \
-	//v             j            arr        omega       Path_idx       tau_OP\n";
-	const char* header = "iPES iProc iTraj   E1[eV]    E2[eV]  b1_max[Bo]  b1[Bo]  b2_max[Bo]   b2[Bo]    d1[Bo]    d2[Bo]     \
-	v       j        arr        omega      Path_idx  E_int[eV]    tau_OP\n";
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the information for the Lindemann Pathways in :",fname_L);
-	// Write the detailed information for Lindemann Traj
-	int iPath = 0;
-	//fprintf(fL,"iNode iProc iTraj      Erel[eV]   Erel_3B[eV]  b1_max[Bohr]      b1[Bohr]  b2_max[Bohr]     b2[Bohr]      d1[Bohr]      d2[Bohr]            v             j            arr        omega    Path_idx\n");  
-	fprintf(fL,header);
-	for (int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fL,format, int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), 
-		            int(Path_Traj[iPath][2][i]), Path_Traj[iPath][3][i], Path_Traj[iPath][4][i], Path_Traj[iPath][5][i], Path_Traj[iPath][6][i], Path_Traj[iPath][7][i],
-		            Path_Traj[iPath][8][i], Path_Traj[iPath][9][i], Path_Traj[iPath][10][i], Path_Traj[iPath][11][i], Path_Traj[iPath][12][i], Path_Traj[iPath][13][i],Path_Traj[iPath][14][i],iPath+1,Path_Traj[iPath][15][i],Path_Traj[iPath][16][i]); 
-	}
-	if(i_Debug_Loc) Write(Debug,"Done writing the information for the Lindemann Pathways in :",fname_L);
-	
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the information for the Chaperon Pathways in :",fname_C);
-	iPath = 1;
-	//fprintf(fC,"iNode iProc iTraj      Erel[eV]   Erel_3B[eV]  b1_max[Bohr]      b1[Bohr]  b2_max[Bohr]     b2[Bohr]      d1[Bohr]      d2[Bohr]            v             j            arr        omega    Path_idx\n");  
-	fprintf(fC,header);
-	for (int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fC,format, int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), 
-		            int(Path_Traj[iPath][2][i]), Path_Traj[iPath][3][i], Path_Traj[iPath][4][i], Path_Traj[iPath][5][i], Path_Traj[iPath][6][i], Path_Traj[iPath][7][i],
-		            Path_Traj[iPath][8][i], Path_Traj[iPath][9][i], Path_Traj[iPath][10][i], Path_Traj[iPath][11][i], Path_Traj[iPath][12][i], Path_Traj[iPath][13][i],Path_Traj[iPath][14][i],iPath+1,Path_Traj[iPath][15][i],Path_Traj[iPath][16][i]); 
-	}
-	if(i_Debug_Loc) Write(Debug,"Done writing the information for the Chaperon Pathways in :",fname_C);
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the information for the Direct Pathways in :",fname_D);
-	iPath = 2;
-	//fprintf(fD,"iNode iProc iTraj      Erel[eV]   Erel_3B[eV]  b1_max[Bohr]      b1[Bohr]  b2_max[Bohr]     b2[Bohr]      d1[Bohr]      d2[Bohr]            v             j            arr        omega    Path_idx\n");  
-	fprintf(fD,header);
-	for (int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fD,format, int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), 
-		            int(Path_Traj[iPath][2][i]), Path_Traj[iPath][3][i], Path_Traj[iPath][4][i], Path_Traj[iPath][5][i], Path_Traj[iPath][6][i], Path_Traj[iPath][7][i],
-		            Path_Traj[iPath][8][i], Path_Traj[iPath][9][i], Path_Traj[iPath][10][i], Path_Traj[iPath][11][i], Path_Traj[iPath][12][i], Path_Traj[iPath][13][i],Path_Traj[iPath][14][i],iPath+1,Path_Traj[iPath][15][i],Path_Traj[iPath][16][i]); 
-	}
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the information for the Other Pathways in :",fname_O);
-	iPath = 3;
-	//fprintf(fO,"iNode iProc iTraj      Erel[eV]   Erel_3B[eV]  b1_max[Bohr]      b1[Bohr]  b2_max[Bohr]     b2[Bohr]      d1[Bohr]      d2[Bohr]            v             j            arr        omega    Path_idx\n");  
-	fprintf(fO,header);
-	for (int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fO,format, int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), 
-		            int(Path_Traj[iPath][2][i]), Path_Traj[iPath][3][i], Path_Traj[iPath][4][i], Path_Traj[iPath][5][i], Path_Traj[iPath][6][i], Path_Traj[iPath][7][i],
-		            Path_Traj[iPath][8][i], Path_Traj[iPath][9][i], Path_Traj[iPath][10][i], Path_Traj[iPath][11][i], Path_Traj[iPath][12][i], Path_Traj[iPath][13][i],Path_Traj[iPath][14][i],iPath+1,Path_Traj[iPath][15][i],Path_Traj[iPath][16][i]); 
-	}
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the information for the Non-Recombination Trajectories in :",fname_N);
-	iPath = 4;
-	//fprintf(fN,"iNode iProc iTraj      Erel[eV]   Erel_3B[eV]  b1_max[Bohr]      b1[Bohr]  b2_max[Bohr]     b2[Bohr]      d1[Bohr]      d2[Bohr]            v             j            arr        omega    Path_idx\n");  
-	fprintf(fN,header);
-	int n = 0;
-	for (int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fN,format, int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), 
-		            int(Path_Traj[iPath][2][i]), Path_Traj[iPath][3][i], Path_Traj[iPath][4][i], Path_Traj[iPath][5][i], Path_Traj[iPath][6][i], Path_Traj[iPath][7][i],
-		            Path_Traj[iPath][8][i], Path_Traj[iPath][9][i], Path_Traj[iPath][10][i], Path_Traj[iPath][11][i], Path_Traj[iPath][12][i], Path_Traj[iPath][13][i],Path_Traj[iPath][14][i],iPath-4,Path_Traj[iPath][15][i],Path_Traj[iPath][16][i]); 
-		n++;
-	}
-	if(i_Debug_Loc) Write(Debug," Number of trajs written in No_Recomb Traj file =",n);
-	
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the unconverged Trajectories file");
-	iPath = 5;
-	fprintf(fU,"iNode iProc iTraj\n"); 
-	for(int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fU,"%4d  %4d  %5d \n", int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), int(Path_Traj[iPath][2][i]));
-	}
-	if(i_Debug_Loc) Write(Debug,"Done Writing the unconverged Trajectories file");
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the Bad Initial Conditions Trajectories file");
-	iPath = 6;
-	fprintf(fB,"iNode iProc iTraj\n"); 
-	for(int i=0; i<count_path[iPath]; i++)
-	{
-		fprintf(fB,"%4d  %4d  %5d \n", int(Path_Traj[iPath][0][i]), int(Path_Traj[iPath][1][i]), int(Path_Traj[iPath][2][i]));
-	}
-	if(i_Debug_Loc) Write(Debug,"Done Writing the Bad Initial Conditions Trajectories file");
-	
-	if(i_Debug_Loc) Write(Debug,"Writing the Traj energy file");
-	fprintf(fE,"iPath iProc  iTraj  E1[eV]  E2[eV]  KE_in[eV]  E_int[eV]\n");
-	for(int i=0; i<Traj_En[0].size(); i++)
-	{
-	  fprintf(fE,"%4d  %4d  %4d  %6.4E  %6.4E  %6.4E  %6.4E\n", int(Traj_En[0][i]), int(Traj_En[1][i]), int(Traj_En[2][i]), Traj_En[3][i], Traj_En[4][i], Traj_En[5][i], Traj_En[6][i]);
-	}
-	
-	fclose(fc);
-	fclose(fL);
-	fclose(fC);
-	fclose(fD);	
-	fclose(fU);	
-	fclose(fB);
-	fclose(fE);
-	
-	if(i_Debug_Loc) Write(Debug,"Exiting");
-	
-	}*/
 
 /**--------------------------------------------------------------------------------------------------------------------------------------------------------**/
 void Statistics :: UpdatePath_Traj(int iPath, int iPES, int iP, int iT, double E1, double E2, double b1, double b2, double b1_max, double b2_max, double d1, double d2, double v, double j, double arr, double omega, double E_int, double T_OP)

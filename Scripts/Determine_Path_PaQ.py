@@ -16,19 +16,23 @@ plt.close('all')
 
 au_s = 2.4188843265E-17;
 Bo_angs = 0.529177
+m_O = 29148.94559
+m_N = 25526.04298
 
 if(len(sys.argv) == 3):
     iP    = int(sys.argv[1])
     iTraj = int(sys.argv[2])
 else:
-    iP = 4
-    iTraj = 48
+    iP = 1
+    iTraj = 402
+
+system = 'N2O'
 
 #Dir = "/Users/ckondur/Desktop/mount_sshfs/QCT_Output/Testing/O2/T_100_200_0_/Bins_10_0/Node_1/Proc_"+str(iP)
 
-# Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Results/N3/Recombination/Rates/Pathway/Temp_18000K/T_18000_18000_0_11/Bins_10_0/Node_1/Proc_"+str(iP)
+Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Results/N2O/Recombination/Rates/Pathway/Temp_18000K/T_18000_18000_0_1/Bins_10_0/Node_1/Proc_"+str(iP)
 # Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/testing/CoarseAIR/N2O/Pathway/IncStpSz_yes/T_100_200_60_0/Bins_10_0/Node_1/Proc_" +str(iP)
-Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_100_200_60_0/Bins_10_0/Node_1/Proc_" +str(iP)
+# Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_100_200_60_0/Bins_10_0/Node_1/Proc_" +str(iP)
 
 fname = Dir + "/PaQEvo-" + str(iTraj) + ".out"
 
@@ -47,6 +51,19 @@ if(invert_time):
 
 t = t*au_s*1E12
 
+if(system == 'O3'):
+    m1 = m_O
+    m2 = m_O
+    m3 = m_O
+elif(system == 'N3'):
+    m1 = m_N
+    m2 = m_N
+    m3 = m_N
+elif(system == 'N2O'):
+    m1 = m_N
+    m2 = m_N
+    m3 = m_O
+
 
 Q = np.zeros([len(t),9])
 P = np.zeros([len(t),9])
@@ -54,13 +71,13 @@ P = np.zeros([len(t),9])
 P[:,0:6] = data[:,2:8] /(au_s*1E12)
 Q[:,0:6] = data[:,8:14]
 
-Q[:,6] = - Q[:,0] - Q[:,3]
-Q[:,7] = - Q[:,1] - Q[:,4]
-Q[:,8] = - Q[:,2] - Q[:,5]
+Q[:,6] = -(m1 * Q[:,0] + m2 * Q[:,3])/m3
+Q[:,7] = -(m1 * Q[:,1] + m2 * Q[:,4])/m3
+Q[:,8] = -(m1 * Q[:,2] + m2 * Q[:,5])/m3
 
-P[:,6] = - P[:,0] - P[:,3]
-P[:,7] = - P[:,1] - P[:,4]
-P[:,8] = - P[:,2] - P[:,5]
+P[:,6] = -(m1 * P[:,0] + m2 * P[:,3])/m3
+P[:,7] = -(m1 * P[:,1] + m2 * P[:,4])/m3
+P[:,8] = -(m1 * P[:,2] + m2 * P[:,5])/m3
 
 t_unq = len(np.unique(t))
 P_temp = [P[0]]
@@ -86,7 +103,6 @@ print("Number of repitions = ",len(data)-len(t))
 R = np.zeros([len(t),4])
 rho = np.zeros((len(t),))
 E = np.zeros((len(t),2))
-
 
 R[:,0] = ( (Q[:,0]-Q[:,3])**2 + (Q[:,1]-Q[:,4])**2 + (Q[:,2]-Q[:,5])**2 )**0.5
 R[:,1] = ( (Q[:,0]-Q[:,6])**2 + (Q[:,1]-Q[:,7])**2 + (Q[: ,2]-Q[:,8])**2 )**0.5

@@ -81,15 +81,18 @@ class Trajectory
 	vector<vector<double>> t_min;   // Array storing thhe time when each pair reaches its minimum distance for the first time
 	vector<vector<int>> i_min;   // Array storing the index
 	
-	double r_direct;   // Radius for direct 3B Collision  (Defined in the constructor)
-	double t_cmplx;    // Time difference for direct 3B collision (Defined in the constructor)
-	double t_skip;     // Time skip parameter for direct 3B collision
-	double t_del;
+	// Pathways
 	int cmplx_id;      // Index of pair that forms a ""complex""
 	double ratio;      // Ratio of 2 body to three body interactions
 	 
 	bool assigned;     // A flag to keep track of wheter the pathway has already been assigned
 	int path_idx;      // Index of recombination pathway; 0 : No recombination; 1: Lindemann; 2: Chaperon; 3: Direct
+
+	double t_2B, t_3B, t_OP;   // Interaction timestamps
+	
+	// SAI
+	double SAI;      // Scattering Angle upon impact
+	double n_rev;    // A counter to count the number of revolutions
 	
 	//public:
 	
@@ -107,7 +110,7 @@ class Trajectory
 	int  Check_Direct();
 	
     void Find_minima(int num, double t_beg);
-    //int Check_Direct(Statistics* Stat);
+   
     void Determine_complex(double t_first_idx[3]);
     double Determine_t_min(int pair);
     
@@ -115,10 +118,9 @@ class Trajectory
     void Calc_Traj_Params();
     
     void Adjust_QN();
-    
-    // New functions to check if determining actual gamma works better in differentiating the mechanism
-    void Calc_Jacobi();
-    //int Check_Direct_New(Statistics* Stat);
+
+    void Evaluate_SAI();
+    double comp_angle(double v1[3], double v2[3]);
     
 };
 

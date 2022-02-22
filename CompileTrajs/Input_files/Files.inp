@@ -1,7 +1,7 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # Main Dir
-/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Rates/Pathway/Temp_18000K/T_18000_18000_0_10/
+/media/chaithanya/Chaithanya_New/QCT_Output/Results/N2O/Recombination/Rates/Pathway/Temp_18000K/T_18000_18000_0_1/
 
 # Bins_Dir
 Bins_10_0/
@@ -26,3 +26,6 @@ O
 
 # Write Path specific output files?
 0
+
+# Write misc properties (SAI, ratio of time scales)?
+1

@@ -63,6 +63,14 @@ void Combine_Output(Input_Class* Input)
     }
   if(i_Debug_Loc) Write(Debug, "Done combining path-specific trajectory files");
 
+  // Merging Misc files
+  if(Input->determine_pathway && Input->write_misc)
+    {
+      Merge_files(Proc_pref, Input->NProcs, Output_Dir, "Misc.out", del_Proc_files);
+    }
+  if(i_Debug_Loc) Write(Debug, "Done combining Misc.out files.");
+
+  // Merging Count.out files
   if (Input->determine_pathway)
     Merge_Count_files(Proc_pref, Input->NProcs, Output_Dir, del_Proc_files);
   

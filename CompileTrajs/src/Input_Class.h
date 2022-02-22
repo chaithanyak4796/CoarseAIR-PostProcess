@@ -20,7 +20,8 @@ class Input_Class
   double sig_LJ;
 
   int write_path_out;    // Write path-specific output files?
-
+  int write_misc;        // Write misc properties?
+  
   //public:
   Input_Class();
   void Read_Input(const std::string& Inp_fname);
