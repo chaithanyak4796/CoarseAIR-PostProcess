@@ -1,7 +1,7 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # Main Dir
-/media/chaithanya/Chaithanya_New/QCT_Output/Results/N2O/Recombination/Rates/Pathway/Temp_18000K/T_18000_18000_0_1/
+/u/ckondur/CoarseAIR_Output/N3/Recombination/Rates/Temp_6000K/T_6000_6000_0_4/
 
 # Bins_Dir
 Bins_10_0/
@@ -18,7 +18,7 @@ Bins_10_0/
 # Atoms Names
 N
 N
-O
+N
 
 # LJ Params: eps (K) and sigma (Angs)
 78.0

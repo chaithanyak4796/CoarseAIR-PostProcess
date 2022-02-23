@@ -7,19 +7,26 @@ Created on Mon Feb 21 15:47:32 2022
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.neighbors import KernelDensity
 import System
+import sys
 
 plt.close('all')
 
-Temp         = 18000
-sys_name     = "N2O"
+if(len(sys.argv) == 2):
+    Temp = int(sys.argv[1])
+else:
+    Temp         = 18000
+
+sys_name     = "N3"
 reac_id      = 0
 resolve_path = True
 num_bins     = 20
+gen_plot     = False
 
-Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Results/N2O/Recombination/Rates/Pathway/Temp_" + str(Temp) + "K/Statistics/"
+#Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Results/N2O/Recombination/Rates/Pathway/Temp_" + str(Temp) + "K/Statistics/"
 # Dir = "/media/chaithanya/Chaithanya_New/QCT_Output/Results/N3/Recombination/Rates/Temp_" + str(Temp) + "K/Statistics/"
+
+Dir = "/u/ckondur/CoarseAIR_Output/" + sys_name + "/Recombination/Rates/Pathway/Temp_" + str(Temp) + "K/Statistics/"
 
 fname = Dir + "Trajectories-3B-Tot.out"
 
@@ -112,16 +119,17 @@ for i in range(len(rings_b2)):
 
 
 if not resolve_path:
-    plt.figure(figsize=(12,8))
-    plt.subplot(121)
-    plt.plot(rings_b1, Op_b1)
-    plt.xlabel('b1 [A]')
-    plt.ylabel(r'$P_r(b1)/P_r$')
+    if gen_plot:
+        plt.figure(figsize=(12,8))
+        plt.subplot(121)
+        plt.plot(rings_b1, Op_b1)
+        plt.xlabel('b1 [A]')
+        plt.ylabel(r'$P_r(b1)/P_r$')
     
-    plt.subplot(122)
-    plt.plot(rings_b2, Op_b2)
-    plt.xlabel('b2 [A]')
-    plt.ylabel(r'$P_r(b2)/P_r$')
+        plt.subplot(122)
+        plt.plot(rings_b2, Op_b2)
+        plt.xlabel('b2 [A]')
+        plt.ylabel(r'$P_r(b2)/P_r$')
     prefix  = Dir + "Opacity_reac_" + str(reac_id+1) + "_"
 
     fname_1 = prefix + str(1) + ".dat"
@@ -148,22 +156,23 @@ if not resolve_path:
     fw2.close()
 
 if(resolve_path):
-    plt.figure(2,figsize=(12,8))
-    plt.subplot(121)
-    plt.plot(rings_b1, Op_b1_L, label="L")
-    plt.plot(rings_b1, Op_b1_C, label="C")
-    plt.plot(rings_b1, Op_b1_D, label="D")
-    plt.xlabel('b1 [A]')
-    plt.ylabel(r'$P_r(b1)/P_r$')
-    plt.legend()
+    if gen_plot:
+        plt.figure(2,figsize=(12,8))
+        plt.subplot(121)
+        plt.plot(rings_b1, Op_b1_L, label="L")
+        plt.plot(rings_b1, Op_b1_C, label="C")
+        plt.plot(rings_b1, Op_b1_D, label="D")
+        plt.xlabel('b1 [A]')
+        plt.ylabel(r'$P_r(b1)/P_r$')
+        plt.legend()
 
-    plt.subplot(122)
-    plt.plot(rings_b2, Op_b2_L, label="L")
-    plt.plot(rings_b2, Op_b2_C, label="C")
-    plt.plot(rings_b2, Op_b2_D, label="D")
-    plt.xlabel('b2 [A]')
-    plt.ylabel(r'$P_r(b2)/P_r$')
-    plt.legend()
+        plt.subplot(122)
+        plt.plot(rings_b2, Op_b2_L, label="L")
+        plt.plot(rings_b2, Op_b2_C, label="C")
+        plt.plot(rings_b2, Op_b2_D, label="D")
+        plt.xlabel('b2 [A]')
+        plt.ylabel(r'$P_r(b2)/P_r$')
+        plt.legend()
 
     prefix  = Dir + "Opacity_path_reac_" + str(reac_id+1) + "_"
 
@@ -191,4 +200,4 @@ if(resolve_path):
     
 
 
-plt.show()
+#plt.show()

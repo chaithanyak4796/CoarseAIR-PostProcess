@@ -1,14 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import System
 
+sys_name = "N3"
+reac_id  = 0
 
-E1 = 500
-E2 = 100
+E1 = 100
+E2 = 200
 Temp = str(E1) + "_" + str(E2)
 print(Temp)
 
-Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N3/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
-Omega = np.linspace(-100,100,21,dtype=int)
+#Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N3/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
+Dir = "/u/ckondur/CoarseAIR_Output/" + sys_name + "/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
+
+Omega = np.linspace(-100,100,11,dtype=int)
+
+system = System.System(sys_name)
 
 def Prob_Omega(Dir,Om):
     fname = Dir + str(Om) + "_0/Bins_10_0/trajectories.out"
@@ -16,8 +23,9 @@ def Prob_Omega(Dir,Om):
 
     b1_tot = Data[:,2]
     b2_tot = Data[:,4]
-    v  = Data[:,10]
-    j  = Data[:,9]
+    v   = Data[:,10]
+    j   = Data[:,9]
+    arr = Data[:,-3]
 
     n = len(b1_tot)
 
@@ -25,7 +33,8 @@ def Prob_Omega(Dir,Om):
     b2 = []
 
     for i in range(n):
-        if(v[i] > 0.5 and j[i] > 0.5):
+        #if(v[i] > 0.5 and j[i] > 0.5):
+        if((arr[i]-0.5) in system.arr_matrix[reac_id]):
             b1.append(b1_tot[i])
             b2.append(b2_tot[i])
 

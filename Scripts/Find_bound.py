@@ -113,8 +113,10 @@ E1 = 100
 E2 = 200
 Temp = str(E1) + "_" + str(E2)
 #Dir="/media/chaithanya/Chaithanya_New/QCT_Output/Test_Current/T_"+Temp+"_"
-Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
 #Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
+#Dir = "/nobackupp2/ckondur/CoarseAIR/CoarseAIR_Output/N2O/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
+
+Dir = "/u/ckondur/CoarseAIR_Output/N2O/Recombination/Fixed_omega/" + Temp + "/T_" + Temp + "_"
 
 #Omega = [-100,-90,-80,-70,-60,-50,-40,-30,-20,-10,0,10,20,30,40,50,60,70,80,90,100]
 Omega = [-100, -80, -60, -40, -20, -10, 0, 10, 20, 40, 60, 80, 100]

@@ -1,10 +1,10 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Do not change the line # of the input file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #Source_Directory
-/media/chaithanya/Chaithanya_New/QCT_Output/Results/N2O/Recombination/Rates/Pathway/Temp_18000K/
+/u/ckondur/CoarseAIR_Output/N3/Recombination/Rates/Temp_16000K/
 
 #Temperature [K]
-18000.0
+16000.0
 
 #omega (min and max)
 -5.0
@@ -12,7 +12,7 @@
 
 #Case No. (suffix) Beg,End
 1
-1
+20
 
 # How to treat f(omega)? 0: f(omega) = 1; f(omega) -> Poisson Distribution but Tau_coll = 1
 1
@@ -26,7 +26,7 @@
 # Atoms Names
 N
 N
-O
+N
 
 # Resolve Pathways? 0: No; 1: Yes
 1

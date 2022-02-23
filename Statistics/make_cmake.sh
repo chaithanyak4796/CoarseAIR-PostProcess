@@ -1,5 +1,5 @@
 #gnu_general
-intel_setup
+#intel_setup
 
 mkdir -p build
 mkdir -p Loggers
